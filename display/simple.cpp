@@ -1,54 +1,50 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <ctime>
-#include <iostream>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <pthread.h>
+// #include <ctime>
+// #include <iostream>
+//
+// #include <GL/glew.h>
+// #include <GL/glut.h>
+//
+// #define GLM_FORCE_RADIANS
+// #include <glm/glm.hpp>
+// #include <glm/gtc/matrix_transform.hpp>
+// #include <glm/gtx/transform.hpp>
+//
+// #include "shaderutil.cpp"
 
-#include <GL/glew.h>
-#include <GL/glut.h>
-
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-
+#include "simple.hpp"
 #include "shaderutil.cpp"
 
-void initThings(void);
-void renderScene(void);
-void changeSize(int width, int height);
+static const int PROJ_WIDTH = 512, PROJ_HEIGHT = 512;
+static float PROJ_RATIO = 1.0*PROJ_WIDTH/PROJ_HEIGHT;
 
-const int PROJ_WIDTH = 512, PROJ_HEIGHT = 512;
-const float PROJ_RATIO = 1.0*PROJ_WIDTH/PROJ_HEIGHT;
-
-struct Pixel {
-  unsigned char red,green,blue;
-};
 Pixel pixels[PROJ_WIDTH*PROJ_HEIGHT];
 
-GLuint programID,vertexArrayID, uvArrayID, textureID, textureSampler, mvpMatrix;
-
-glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f*PROJ_RATIO, 1.0f*PROJ_RATIO, 1.0f, -1.0f);
-glm::mat4 view = glm::mat4(1.0f);
-glm::mat4 model = glm::mat4(1.0f);
-glm::mat4 mvp = glm::mat4(1.0f);
-
-//Define a sexy to view
-static const GLfloat vertexArrayData[] = {
+//Define vertices and their UV texture coords.
+static GLfloat vertexArrayData[] = {
   -1.0f, -1.0f, 0.0f,
   -1.0f, 1.0f, 0.0f,
    1.0f, 1.0f, 0.0f,
    1.0f, -1.0f, 0.0f
 };
-static const GLfloat uvArrayData[] = {
+static GLfloat uvArrayData[] = {
   0.0f, 0.0f,
   0.0f, 1.0f,
   1.0f, 1.0f,
   1.0f, 0.0f
 };
 
+GLuint programID,vertexArrayID, uvArrayID, textureID, textureSampler, mvpMatrix;
+
+glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f*PROJ_RATIO, 1.0f*PROJ_RATIO, 1.0f, -1.0f);
+glm::mat4 view = glm::mat4(1.0f);
+glm::mat4 model = glm::mat4(1.0f);
+glm::mat4 mvp = projection * view * model;
+
 //To be used with pthreads
-void *beginOpenGL( const Pixel* pixels, int argc, char* argv[] ) {
+int beginOpenGL(int argc, char* argv[]) {
   glutInit(&argc, argv);
   glutInitWindowPosition(-1, -1); //Default, Default
   glutInitWindowSize(PROJ_WIDTH, PROJ_HEIGHT);
@@ -58,13 +54,14 @@ void *beginOpenGL( const Pixel* pixels, int argc, char* argv[] ) {
   glewExperimental=true; // https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW_.28OpenGL_Extension_Wrangler.29
   if (glewInit() != GLEW_OK) {
       fprintf(stderr, "Failed to initialize GLEW\n");
-      return (void*)-1;
+      return -1;
   }
 
-  initThings();
+  initOpenGLData();
 
   //Defines the standard rendering function
   glutDisplayFunc(renderScene);
+  // glutDisplayFunc(staticFunc);
   //Defines a function to be called when the window is resized
   glutReshapeFunc(changeSize);
 
@@ -74,10 +71,10 @@ void *beginOpenGL( const Pixel* pixels, int argc, char* argv[] ) {
   glDeleteBuffers(1, &uvArrayID);
   glDeleteProgram(programID);
   glDeleteTextures(1, &textureID);
-  return (void*)1;
+  return 1;
 }
 
-void initThings(void) {
+void initOpenGLData(void) {
   //Give some color to things.
   for(int i = 0; i < PROJ_WIDTH*PROJ_HEIGHT; i++) {
     pixels[i].red = rand() % 255;
@@ -86,7 +83,7 @@ void initThings(void) {
   }
 
   // Load shaders
-  programID = LoadShaders("vertex.glsl", "fragment.glsl");
+  programID = LoadShaders("display/vertex.glsl", "display/fragment.glsl");
 
   glGenBuffers(1, &vertexArrayID);
   glBindBuffer(GL_ARRAY_BUFFER, vertexArrayID);
