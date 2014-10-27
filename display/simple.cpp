@@ -17,9 +17,6 @@
 #include "simple.hpp"
 #include "shaderutil.cpp"
 
-static const int PROJ_WIDTH = 512, PROJ_HEIGHT = 512;
-static float PROJ_RATIO = 1.0*PROJ_WIDTH/PROJ_HEIGHT;
-
 Pixel pixels[PROJ_WIDTH*PROJ_HEIGHT];
 
 //Define vertices and their UV texture coords.

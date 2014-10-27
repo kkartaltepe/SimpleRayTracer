@@ -1,10 +1,12 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
 
 #include "display/simple.hpp"
 
 void* beginTracing(void* args) {
-  printf("Tracing begun\n");
+  sleep(2);
+  printf("Printing first Pixel value: (%d,%d,%d)\n", pixels[0].red, pixels[0].green, pixels[0].blue );
   return (void*)-1;
 }
 

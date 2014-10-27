@@ -11,9 +11,14 @@
 
 #ifndef SIMPLE_H
 #define SIMPLE_H
-struct Pixel {
+static const int PROJ_WIDTH = 512, PROJ_HEIGHT = 512;
+static float PROJ_RATIO = 1.0*PROJ_WIDTH/PROJ_HEIGHT;
+
+typedef struct Pixel {
   unsigned char red,green,blue;
-};
+} Pixel;
+
+extern Pixel pixels[PROJ_WIDTH*PROJ_HEIGHT];
 
 int beginOpenGL(int argc, char* argv[] );
 
