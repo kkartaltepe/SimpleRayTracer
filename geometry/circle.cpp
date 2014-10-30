@@ -10,7 +10,7 @@ private:
     float radius;
 public:
   Circle(glm::vec3 center, float radius): center(center), radius(radius) {}
-  
+
   /**
    * calculate the intersection point of a ray with a circle
    * @param  ray (incoming ray)
@@ -29,6 +29,6 @@ public:
       return Intersection(intersectionPoint, ray, glm::normalize(intersectionPoint-center));
     }
     else
-      return Intersection(glm::vec3(0.0f), Ray(glm::vec3(0.0f), glm::vec3(0.0f)), glm::vec3(0.0f));
+      return Intersection();
   }
 };

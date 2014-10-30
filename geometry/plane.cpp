@@ -19,9 +19,9 @@ public:
     float numerator = glm::dot(originToPlane, normal);
     float denominator = glm::dot(ray.direction, normal);
     if(denominator == 0) { //Ray is perpendicular to the normal, does not intersect the plane unless it lays within the plane.
-      return Intersection(glm::vec3(0.0f), Ray(glm::vec3(0.0f), glm::vec3(0.0f)), glm::vec3(0.0f));
+      return Intersection();
     } else { //The ray intersects the plane, at numerator/denominator*ray.
-      return Intersection(ray.direction*numerator/denominator, ray, normal);
+      return Intersection(ray.direction*numerator/denominator - ray.origin, ray, normal);
     }
   }
 };

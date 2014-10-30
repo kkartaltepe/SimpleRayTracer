@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <glm/glm.hpp>
 #include <math.h>
 
@@ -19,12 +20,21 @@ public:
    * @param  ray
    */
   Intersection intersect(Ray ray){
+    // printf("Checking if ray intersects triangle\n");
     Intersection intersection = plane.intersect(ray);
+    if(!intersection.hit()) {
+      // printf("Ray didnt hit plane\n");
+      return Intersection(); //Didnt hit the plane
+    }
+
+
     glm::vec3 baryCoords = baryOf(intersection.point);
+    // printf("Hit plane at (%f,%f,%f)\n", intersection.point.x, intersection.point.y, intersection.point.z);
+    // printf("Hit plane with barycentric (%f,%f,%f)\n", baryCoords.x, baryCoords.y, baryCoords.z);
     if(baryCoords.x > 0 && baryCoords.y > 0 && baryCoords.z > 0) //It hit the triangle
       return intersection;
     else
-      return Intersection(glm::vec3(0.0f), Ray(glm::vec3(0.0f), glm::vec3(0.0f)), glm::vec3(0.0f)); //It didnt
+      return Intersection(); //It didnt
   }
 
   /**
@@ -36,11 +46,11 @@ public:
   glm::vec3 baryOf(glm::vec3 point) {
     glm::vec3 baryCoords = glm::vec3(0.0f);
     baryCoords.x =
-    (plane.p2.y-plane.p3.y)*(point.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(point.y-plane.p3.y)
-    /(plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y);
+    ((plane.p2.y-plane.p3.y)*(point.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(point.y-plane.p3.y))
+    /((plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y));
     baryCoords.y =
-    (plane.p3.y-plane.p1.y)*(point.x-plane.p3.x)+(plane.p1.x-plane.p3.x)*(point.y-plane.p3.y)
-    /(plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y);
+    ((plane.p3.y-plane.p1.y)*(point.x-plane.p3.x)+(plane.p1.x-plane.p3.x)*(point.y-plane.p3.y))
+    /((plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y));
     baryCoords.z = 1-baryCoords.x-baryCoords.y;
     return baryCoords;
   }

@@ -27,10 +27,10 @@ static GLfloat vertexArrayData[] = {
    1.0f, -1.0f, 0.0f
 };
 static GLfloat uvArrayData[] = {
-  0.0f, 0.0f,
   0.0f, 1.0f,
-  1.0f, 1.0f,
-  1.0f, 0.0f
+  0.0f, 0.0f,
+  1.0f, 0.0f,
+  1.0f, 1.0f
 };
 
 GLuint programID,vertexArrayID, uvArrayID, textureID, textureSampler, mvpMatrix;
