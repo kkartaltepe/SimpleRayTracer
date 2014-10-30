@@ -9,10 +9,11 @@
 #include "geometry/circle.cpp"
 #include "geometry/triangle.cpp"
 #include "geometry/ray.hpp"
+#include "scene/light.hpp"
 
 std::vector<Circle> circles;
 std::vector<Triangle> triangles;
-std::vector<glm::vec3> lights; //assumed white for the moment.
+std::vector<Light> lights; //assumed white for the moment.
 
 glm::vec3 trace(Ray ray);
 
@@ -24,11 +25,14 @@ void* beginTracing(void* args) {
   triangles.push_back(Triangle(glm::vec3(-100.0f, -100.0f, 0.0f),
                               glm::vec3(100.0f, 100.0f, 0.0f),
                               glm::vec3(100.0f, -100.0f, 0.0f)));
-  lights.push_back(glm::vec3(0.0f));
+  lights.push_back(Light(glm::vec3(-100.0f, 0.0f, -25.0f),
+                          glm::vec3(2500.0f, 0.0f, 0.0f)));
+  lights.push_back(Light(glm::vec3(100.0f, 0.0f, -25.0f),
+                          glm::vec3(0.0f, 0.0f, 2500.0f)));
 
   for(int i = 0; i < PROJ_WIDTH*PROJ_HEIGHT; i++) {
     glm::vec3 color = trace(
-                        Ray(glm::vec3(0.0f, 0.0f, -100.0f),
+                        Ray(glm::vec3(0.0f, 0.0f, -50.0f),
                             glm::normalize(glm::vec3(2.0f*(i%PROJ_WIDTH)-PROJ_WIDTH, 2.0f*(i/PROJ_HEIGHT)-PROJ_HEIGHT, 100.0f)))
                       );
     pixels[i].red = int(fminf(color.x, 1.0f)*255);
@@ -90,24 +94,16 @@ Intersection getClosestIntersection(Ray ray) {
  */
 glm::vec3 trace(Ray ray) {
   glm::vec3 color = glm::vec3(0.0f);
-  // printf("Tracing ray (%f,%f,%f)->(%f,%f,%f)\n",
-  //         ray.origin.x,
-  //         ray.origin.y,
-  //         ray.origin.z,
-  //         ray.direction.x,
-  //         ray.direction.y,
-  //         ray.direction.z);
   Intersection inters = getClosestIntersection(ray);
   if(inters.hit()) { //if we hit something trace to all the lights to see what color it should be.
-    // printf("Hit object at (%f,%f,%f)\n", inters.point.x, inters.point.y, inters.point.z);
-    for(std::vector<glm::vec3>::iterator lightIter = lights.begin(); lightIter != lights.end(); ++lightIter) {
-      glm::vec3 lineToLight = *lightIter - inters.point;
+    for(std::vector<Light>::iterator lightIter = lights.begin(); lightIter != lights.end(); ++lightIter) {
+      glm::vec3 lineToLight = lightIter->location - inters.point;
       Ray shadowRay = Ray(inters.point, glm::normalize(lineToLight));
       Intersection shadowIntersection = getClosestIntersection(shadowRay);
       glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
       if(!shadowIntersection.hit() // Nothing on path of shadow ray.
         ||  glm::dot(lineToLight, lineToLight) < glm::dot(lineToShadowRayInters, lineToShadowRayInters)) { // We hit something behind the light
-        color += glm::vec3(1.0f); //Assume all lights are white dont attenuate light yet.
+          color += lightIter->color/glm::dot(lineToLight, lineToLight); //Assume all lights are white attenuate by inverse square.
       }
     }
   }

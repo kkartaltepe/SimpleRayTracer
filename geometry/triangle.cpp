@@ -20,17 +20,11 @@ public:
    * @param  ray
    */
   Intersection intersect(Ray ray){
-    // printf("Checking if ray intersects triangle\n");
     Intersection intersection = plane.intersect(ray);
-    if(!intersection.hit()) {
-      // printf("Ray didnt hit plane\n");
+    if(!intersection.hit())
       return Intersection(); //Didnt hit the plane
-    }
-
-
+      
     glm::vec3 baryCoords = baryOf(intersection.point);
-    // printf("Hit plane at (%f,%f,%f)\n", intersection.point.x, intersection.point.y, intersection.point.z);
-    // printf("Hit plane with barycentric (%f,%f,%f)\n", baryCoords.x, baryCoords.y, baryCoords.z);
     if(baryCoords.x > 0 && baryCoords.y > 0 && baryCoords.z > 0) //It hit the triangle
       return intersection;
     else

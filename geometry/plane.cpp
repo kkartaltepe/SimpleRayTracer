@@ -18,6 +18,7 @@ public:
     glm::vec3 normal = glm::normalize(glm::cross(p2-p1, p3-p1));
     float numerator = glm::dot(originToPlane, normal);
     float denominator = glm::dot(ray.direction, normal);
+    
     if(denominator == 0) { //Ray is perpendicular to the normal, does not intersect the plane unless it lays within the plane.
       return Intersection();
     } else { //The ray intersects the plane, at numerator/denominator*ray.

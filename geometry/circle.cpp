@@ -21,14 +21,14 @@ public:
     float distToCenterSquared = glm::dot(originToCenter, originToCenter);
     float distAlongProjSquared = projectionLength*projectionLength;
     float discriminant = distAlongProjSquared - distToCenterSquared + radius*radius;
-    if(discriminant > 0) {
+    if(discriminant < 0)
+      return Intersection();
+    else {
       //Find the closest intersection point by ray*d = quadratic formula
       float distanceAlongRayPlus = sqrtf(discriminant) - projectionLength;
       float distanceAlongRayMinus = -1.0f * sqrtf(discriminant) - projectionLength;
       glm::vec3 intersectionPoint = ray.direction * fminf(distanceAlongRayPlus, distanceAlongRayMinus);
       return Intersection(intersectionPoint, ray, glm::normalize(intersectionPoint-center));
     }
-    else
-      return Intersection();
   }
 };
