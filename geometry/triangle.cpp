@@ -1,3 +1,6 @@
+#ifndef TRIANGLE_CPP
+#define TRIANGLE_CPP
+
 #include <stdio.h>
 #include <glm/glm.hpp>
 #include <math.h>
@@ -23,7 +26,7 @@ public:
     Intersection intersection = plane.intersect(ray);
     if(!intersection.hit())
       return Intersection(); //Didnt hit the plane
-      
+
     glm::vec3 baryCoords = baryOf(intersection.point);
     if(baryCoords.x > 0 && baryCoords.y > 0 && baryCoords.z > 0) //It hit the triangle
       return intersection;
@@ -49,3 +52,5 @@ public:
     return baryCoords;
   }
 };
+
+#endif /* end of include guard: TRIANGLE_CPP */

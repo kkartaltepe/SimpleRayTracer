@@ -1,19 +1,3 @@
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <pthread.h>
-// #include <ctime>
-// #include <iostream>
-//
-// #include <GL/glew.h>
-// #include <GL/glut.h>
-//
-// #define GLM_FORCE_RADIANS
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtx/transform.hpp>
-//
-// #include "shaderutil.cpp"
-
 #include "simple.hpp"
 #include "shaderutil.cpp"
 
@@ -74,9 +58,9 @@ int beginOpenGL(int argc, char* argv[]) {
 void initOpenGLData(void) {
   //Give some color to things.
   for(int i = 0; i < PROJ_WIDTH*PROJ_HEIGHT; i++) {
-    pixels[i].red = rand() % 255;
-    pixels[i].green = rand() % 255;
-    pixels[i].blue = rand() % 255;
+    pixels[i].red = (float)i/(PROJ_WIDTH*PROJ_HEIGHT)*255;
+    pixels[i].blue = (float)(i%PROJ_WIDTH)/PROJ_WIDTH*255;
+    pixels[i].green = 0;
   }
 
   // Load shaders

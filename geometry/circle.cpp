@@ -1,3 +1,6 @@
+#ifndef CIRCLE_CPP
+#define CIRCLE_CPP
+
 #include <glm/glm.hpp>
 #include <math.h>
 
@@ -32,3 +35,5 @@ public:
     }
   }
 };
+
+#endif /* end of include guard: CIRCLE_CPP */

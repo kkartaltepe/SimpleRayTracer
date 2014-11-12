@@ -2,91 +2,56 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
-#include <stdio.h>
-#include <fstream>
-#include <string>
 #include <vector>
 
 
 #include "display/simple.hpp"
+#include "geometry/loader.cpp"
 #include "geometry/circle.cpp"
 #include "geometry/triangle.cpp"
 #include "geometry/ray.hpp"
 #include "scene/light.hpp"
+#include "scene/camera.cpp"
 
 std::vector<Circle> circles;
 std::vector<Triangle> triangles;
-std::vector<Light> lights; //assumed white for the moment.
+std::vector<Light> lights;
+
+Camera camera = Camera(
+  glm::vec3(50.0f, 50.0f, -300.0f),
+  glm::vec3(0.0f, 0.0f, 0.0f),
+  glm::vec3(0.0f, 1.0f, 0.0f),
+  120.0f, PROJ_WIDTH, PROJ_HEIGHT);
 
 glm::vec3 trace(Ray ray);
 
-/**
- * Load mesh data from a Wavefront OBJ file. (exported from blender)
- */
-void loadTriangles(const char * meshDataPath) {
-  std::vector<glm::vec3> vertices;
-  std::ifstream mestDataStream(meshDataPath, std::ios::in);
-
-  if(mestDataStream.is_open()){
-    std::string line = "";
-    while(getline(mestDataStream, line)){
-      if(line.length() < 1 || line[0] == '#')
-        continue;
-      if(line[0] == 'v') {//Describes a vertex
-        std::string::size_type first=2, second, third; //first space follows immediately from 'v '
-        float firstF, secondF, thirdF;
-        second = line.find_first_of(std::string(" "), first)+1; //skip the space we find
-        third = line.find_first_of(std::string(" "), second)+1;
-
-        firstF = atof(line.substr(first, second-first).c_str());
-        secondF = atof(line.substr(second, third-second).c_str());
-        thirdF = atof(line.substr(third, line.length()-third).c_str());
-        glm::vec3 vertex = glm::vec3(firstF, secondF, thirdF);
-        vertices.push_back(vertex);
-      }
-      else if(line[0] == 'f') {//Describes a face, follows after vertices in file.
-        std::string::size_type first=2, second, third; //first space follows immediately from 'f '
-        int firstI, secondI, thirdI;
-        second = line.find_first_of(std::string(" "), first)+1;
-        third = line.find_first_of(std::string(" "), second)+1;
-
-        firstI = atoi(line.substr(first, second-first).c_str())-1;  //Verticies in the file are 1-indexed
-        secondI = atoi(line.substr(second, third-second).c_str())-1;
-        thirdI = atoi(line.substr(third, line.length()-third).c_str())-1;
-        triangles.push_back(Triangle(vertices[firstI], vertices[secondI], vertices[thirdI]));
-      }
-    }
-    mestDataStream.close();
-  } else { printf("Failed to load mesh data\n"); }
+void initSceneData() {
+  triangles = loadTriangles("cube.obj");
+  lights.push_back(Light(glm::vec3(0.0f, 0.0f, -200.0f),
+                          glm::vec3(70000.0f, 0.0f, 0.0f)));
+  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
+                          glm::vec3(0.0f, 0.0f, 70000.0f)));
+  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
+                          glm::vec3(0.0f, 0.0f, 70000.0f)));
 }
 
 void* beginTracing(void* args) {
   sleep(2);
-  loadTriangles("scene.obj");
-  lights.push_back(Light(glm::vec3(-100.0f, 0.0f, -25.0f),
-                          glm::vec3(2500.0f, 0.0f, 0.0f)));
-  lights.push_back(Light(glm::vec3(100.0f, 0.0f, -25.0f),
-                          glm::vec3(0.0f, 0.0f, 2500.0f)));
-
-  for(int i = 0; i < PROJ_WIDTH*PROJ_HEIGHT; i++) {
-    glm::vec3 color = trace(
-                        Ray(glm::vec3(0.0f, 0.0f, -50.0f),
-                            glm::normalize(glm::vec3(2.0f*(i%PROJ_WIDTH)-PROJ_WIDTH, 2.0f*(i/PROJ_HEIGHT)-PROJ_HEIGHT, 100.0f)))
-                      );
-    pixels[i].red = int(fminf(color.x, 1.0f)*255);
-    pixels[i].green = int(fminf(color.y, 1.0f)*255);
-    pixels[i].blue = int(fminf(color.z, 1.0f)*255);
+  std::vector<Ray> rays = camera.raysToCast();
+  int index = 0;
+  for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
+    glm::vec3 color = trace(*rayIter);
+    pixels[index].red = int(fminf(color.x, 1.0f)*255);
+    pixels[index].green = int(fminf(color.y, 1.0f)*255);
+    pixels[index].blue = int(fminf(color.z, 1.0f)*255);
+    index++;
     glutPostRedisplay();
   }
-  // glm::vec3 color = trace(
-  //                     Ray(glm::vec3(0.0f, 0.0f, -100.0f),
-  //                         glm::normalize(glm::vec3(-50.0f, 50.0f, 100.0f)))
-  //                   );
-  // printf("Pixel value: (%f,%f,%f)\n", color.x, color.y, color.z );
   return (void*)-1;
 }
 
 int main(int argc, char** argv) {
+  initSceneData();
   pthread_t tracingThread;
   printf("Creating thread\n");
   int status = pthread_create(&tracingThread, NULL, beginTracing, (void *)NULL);
