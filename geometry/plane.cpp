@@ -11,7 +11,6 @@ class Plane {
 public:
   glm::vec3 p1,p2,p3;
   Plane(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): p1(p1), p2(p2), p3(p3) { }
-  Plane() {p1 = glm::vec3(0.0f); p2 = glm::vec3(0.0f); p3 = glm::vec3(0.0f);}
   /**
    * calculate the intersection point of a ray with this plane
    * @param  ray

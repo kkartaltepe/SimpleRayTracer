@@ -18,7 +18,7 @@ std::vector<Triangle> triangles;
 std::vector<Light> lights;
 
 Camera camera = Camera(
-  glm::vec3(50.0f, 50.0f, -300.0f),
+  glm::vec3(-300.0f, 0.0f, 0.0f),
   glm::vec3(0.0f, 0.0f, 0.0f),
   glm::vec3(0.0f, 1.0f, 0.0f),
   120.0f, PROJ_WIDTH, PROJ_HEIGHT);
@@ -27,12 +27,12 @@ glm::vec3 trace(Ray ray);
 
 void initSceneData() {
   triangles = loadTriangles("cube.obj");
-  lights.push_back(Light(glm::vec3(0.0f, 0.0f, -200.0f),
+  lights.push_back(Light(glm::vec3(0.0f, 0.0f, -150.0f),
+                          glm::vec3(0.0f, 0.0f, 70000.0f)));
+  lights.push_back(Light(glm::vec3(0.0f, 150.0f, 0.0f),
+                          glm::vec3(0.0f, 70000.0f, 0.0f)));
+  lights.push_back(Light(glm::vec3(150.0f, 0.0f, 0.0f),
                           glm::vec3(70000.0f, 0.0f, 0.0f)));
-  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
-                          glm::vec3(0.0f, 0.0f, 70000.0f)));
-  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
-                          glm::vec3(0.0f, 0.0f, 70000.0f)));
 }
 
 void* beginTracing(void* args) {
