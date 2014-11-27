@@ -44,6 +44,6 @@ std::vector<Triangle> loadTriangles(const char * meshDataPath) {
       }
     }
     mestDataStream.close();
-  } else { printf("Failed to load mesh data\n"); }
+  } else { printf("Failed to load mesh data from '%s'\n", meshDataPath); }
   return triangles;
 }

@@ -18,26 +18,42 @@ std::vector<Triangle> triangles;
 std::vector<Light> lights;
 
 Camera camera = Camera(
-  glm::vec3(-300.0f, 0.0f, 0.0f),
+  glm::vec3(0.0f, 150.0f, -200.0f),
   glm::vec3(0.0f, 0.0f, 0.0f),
   glm::vec3(0.0f, 1.0f, 0.0f),
-  120.0f, PROJ_WIDTH, PROJ_HEIGHT);
+  90.0f, PROJ_WIDTH, PROJ_HEIGHT);
 
 glm::vec3 trace(Ray ray);
 
 void initSceneData() {
+  // triangles.push_back(Triangle(glm::vec3(50.0f, -100.0f, 100.0f),
+  //                              glm::vec3(100.0f, 100.0f, 100.0f),
+  //                             //  glm::vec3(-100.0f, 100.0f, 100.0f)));
+  // triangles.push_back(Triangle(glm::vec3(0.0f, 100.0f, 100.0f),
+  //                              glm::vec3(-100.0f, -100.0f, 100.0f),
+  //                              glm::vec3(100.0f, -100.0f, 100.0f)));
   triangles = loadTriangles("cube.obj");
-  lights.push_back(Light(glm::vec3(0.0f, 0.0f, -150.0f),
-                          glm::vec3(0.0f, 0.0f, 70000.0f)));
-  lights.push_back(Light(glm::vec3(0.0f, 150.0f, 0.0f),
-                          glm::vec3(0.0f, 70000.0f, 0.0f)));
-  lights.push_back(Light(glm::vec3(150.0f, 0.0f, 0.0f),
-                          glm::vec3(70000.0f, 0.0f, 0.0f)));
+  lights.push_back(Light(glm::vec3(100.0f, 0.0f, -150.0f),
+                          glm::vec3(0.0f, 0.0f, 8000.0f)));
+  lights.push_back(Light(glm::vec3(-100.0f, 0.0f, -150.0f),
+                          glm::vec3(0.0f, 8000.0f, 0.0f)));
+  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
+                          glm::vec3(8000.0f, 0.0f, 0.0f)));
 }
 
 void* beginTracing(void* args) {
   sleep(2);
   std::vector<Ray> rays = camera.raysToCast();
+  // std::vector<Ray> rays;
+  // for(int y = PROJ_HEIGHT; y > 0; --y) {
+  //   for(int x = 0; x < PROJ_WIDTH; ++x) {
+  //     Ray toCast = Ray(glm::vec3(0.0f, 0.0f, -150.0f),
+  //                      glm::vec3((float)x-PROJ_WIDTH/2.0f, (float)y-PROJ_WIDTH/2.0f, 150.0f));
+  //     // printf("from (%f,%f,%f) to (%f, %f, 0)\n", toCast.origin.x, toCast.origin.y, toCast.origin.z, toCast.direction.x, toCast.direction.y);
+  //     rays.push_back(toCast);
+  //   }
+  // }
+
   int index = 0;
   for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
     glm::vec3 color = trace(*rayIter);
@@ -77,11 +93,10 @@ Intersection getClosestIntersection(Ray ray) {
   float closestDistanceSquared = 0.0f;
   for(std::vector<Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it) {
     Intersection inters = it->intersect(ray);
-    if( inters.hit() ) {
-      // printf("Ray hit triangle\n");
+    if( inters.didHit() ) {
       glm::vec3 lineToInters = inters.point - inters.incident.origin;
       float distanceSquared = glm::dot(lineToInters, lineToInters);
-      if( distanceSquared < closestDistanceSquared || !closestInters.hit()) {
+      if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
         closestInters = inters;
         closestDistanceSquared = distanceSquared;
       }
@@ -98,13 +113,14 @@ Intersection getClosestIntersection(Ray ray) {
 glm::vec3 trace(Ray ray) {
   glm::vec3 color = glm::vec3(0.0f);
   Intersection inters = getClosestIntersection(ray);
-  if(inters.hit()) { //if we hit something trace to all the lights to see what color it should be.
+  if(inters.didHit()) { //if we hit something trace to all the lights to see what color it should be.
     for(std::vector<Light>::iterator lightIter = lights.begin(); lightIter != lights.end(); ++lightIter) {
       glm::vec3 lineToLight = lightIter->location - inters.point;
-      Ray shadowRay = Ray(inters.point, glm::normalize(lineToLight));
+      Ray shadowRay = Ray(inters.point, lineToLight);
+      //Check if shadow ray is "inside" the triangle (fix culling)
       Intersection shadowIntersection = getClosestIntersection(shadowRay);
       glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
-      if(!shadowIntersection.hit() // Nothing on path of shadow ray.
+      if(!shadowIntersection.didHit() // Nothing on path of shadow ray.
         ||  glm::dot(lineToLight, lineToLight) < glm::dot(lineToShadowRayInters, lineToShadowRayInters)) { // We hit something behind the light
           color += lightIter->color/glm::dot(lineToLight, lineToLight); //attenuate light color by inverse square.
       }

@@ -28,7 +28,7 @@ glm::mat4 mvp = projection * view * model;
 int beginOpenGL(int argc, char* argv[]) {
   glutInit(&argc, argv);
   glutInitWindowPosition(-1, -1); //Default, Default
-  glutInitWindowSize(PROJ_WIDTH, PROJ_HEIGHT);
+  glutInitWindowSize(fmax(PROJ_WIDTH, 256), fmax(PROJ_HEIGHT, 256));
   glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
   glutCreateWindow("SimpleGL Test");
 
@@ -82,8 +82,10 @@ void initOpenGLData(void) {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, PROJ_WIDTH, PROJ_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
   //Setup mipmaping and magnification filter.
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glGenerateMipmap(GL_TEXTURE_2D);
 
   //Grab uniform identifiers before rendering

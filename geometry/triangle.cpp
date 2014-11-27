@@ -11,9 +11,10 @@
 
 class Triangle {
 private:
+public:
     Plane plane;
 
-public:
+
   Triangle(Plane p): plane(p) { }
   Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): plane(p1, p2, p3) { }
   /**
@@ -22,14 +23,16 @@ public:
    */
   Intersection intersect(Ray ray){
     Intersection intersection = plane.intersect(ray);
-    if(!intersection.hit())
-      return Intersection(); //Didnt hit the plane
+    if(!intersection.didHit()) //It didnt hit the plane
+      return intersection;
 
     glm::vec3 baryCoords = baryOf(intersection.point);
-    if(baryCoords.x > 0 && baryCoords.y > 0 && baryCoords.z > 0) //It hit the triangle
-      return intersection;
-    else
-      return Intersection(); //It didnt
+    if(baryCoords.x < 0 || baryCoords.y < 0 || baryCoords.z < 0) {
+      //printf("Failed to hit triangle with bary (%f, %f, %f)\n", baryCoords.x,  baryCoords.y,  baryCoords.z);
+      intersection.hit = false;
+    } //It hit plane but didnt hit the triangle
+
+    return intersection;
   }
 
   /**
@@ -39,13 +42,19 @@ public:
    * @return
    */
   glm::vec3 baryOf(glm::vec3 point) {
-    glm::vec3 baryCoords = glm::vec3(0.0f);
-    baryCoords.x =
-    ((plane.p2.y-plane.p3.y)*(point.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(point.y-plane.p3.y))
-    /((plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y));
-    baryCoords.y =
-    ((plane.p3.y-plane.p1.y)*(point.x-plane.p3.x)+(plane.p1.x-plane.p3.x)*(point.y-plane.p3.y))
-    /((plane.p2.y-plane.p3.y)*(plane.p1.x-plane.p3.x)+(plane.p3.x-plane.p2.x)*(plane.p1.y-plane.p3.y));
+    glm::vec3 edge1,edge2,p1ToPoint,p2ToPoint,p3ToPoint,baryCoords;
+    edge1 = plane.p2 - plane.p1;
+    edge2 = plane.p3 - plane.p1;
+    p1ToPoint = point - plane.p1;
+
+    //IT FINALLY WORKS THANKS TO http://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+    //Literally everywhere on the internet has it wrong.
+    float denom = glm::dot(edge1, edge1)*glm::dot(edge2,edge2)-pow(glm::dot(edge1, edge2),2);
+    float uNumer = glm::dot(edge2, edge2)*glm::dot(p1ToPoint, edge1)-glm::dot(edge1, edge2)*glm::dot(p1ToPoint, edge2);
+    float vNumer = glm::dot(edge1, edge1)*glm::dot(p1ToPoint, edge2)-glm::dot(edge1, edge2)*glm::dot(p1ToPoint, edge1);
+
+    baryCoords.x = uNumer/denom;
+    baryCoords.y = vNumer/denom;
     baryCoords.z = 1-baryCoords.x-baryCoords.y;
     return baryCoords;
   }

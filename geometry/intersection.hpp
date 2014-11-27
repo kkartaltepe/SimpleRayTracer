@@ -9,11 +9,12 @@ public:
   glm::vec3 point;
   Ray incident;
   glm::vec3 normal;
+  bool hit;
   //and a Material?
   Intersection(glm::vec3 p, Ray i, glm::vec3 n)
-    : point(p), incident(i), normal(n) { }
-  Intersection() { }
-  bool hit() { return glm::dot(normal, normal) > 0;}
+    : point(p), incident(i), normal(n) { hit=true; }
+  Intersection() { hit=false; }
+  bool didHit() { return hit;}
 };
 
 #endif /* end of include guard: INTERSECTION_HPP */
