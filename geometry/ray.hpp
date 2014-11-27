@@ -5,9 +5,9 @@
 
 class Ray {
 public:
-  glm::dvec3 origin;
-  glm::dvec3 direction;
-  Ray(glm::dvec3 origin, glm::dvec3 dir)
+  glm::vec3 origin;
+  glm::vec3 direction;
+  Ray(glm::vec3 origin, glm::vec3 dir)
     : origin(origin) {direction = glm::normalize(dir);}
   Ray() { }
 };

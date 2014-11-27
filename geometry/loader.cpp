@@ -10,7 +10,7 @@
  * Dont look at me im HIDEOUS
  */
 std::vector<Triangle> loadTriangles(const char * meshDataPath) {
-  std::vector<glm::dvec3> vertices;
+  std::vector<glm::vec3> vertices;
   std::vector<Triangle> triangles;
   std::ifstream mestDataStream(meshDataPath, std::ios::in);
 
@@ -21,14 +21,14 @@ std::vector<Triangle> loadTriangles(const char * meshDataPath) {
         continue;
       if(line[0] == 'v') {//Describes a vertex
         std::string::size_type first=2, second, third; //first space follows immediately from 'v '
-        double firstF, secondF, thirdF;
+        float firstF, secondF, thirdF;
         second = line.find_first_of(std::string(" "), first)+1; //skip the space we find
         third = line.find_first_of(std::string(" "), second)+1;
 
         firstF = atof(line.substr(first, second-first).c_str());
         secondF = atof(line.substr(second, third-second).c_str());
         thirdF = atof(line.substr(third, line.length()-third).c_str());
-        glm::dvec3 vertex = glm::dvec3(firstF, secondF, thirdF);
+        glm::vec3 vertex = glm::vec3(firstF, secondF, thirdF);
         vertices.push_back(vertex);
       }
       else if(line[0] == 'f') {//Describes a face, follows after vertices in file.
