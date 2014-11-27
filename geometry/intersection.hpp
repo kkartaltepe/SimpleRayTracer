@@ -6,12 +6,12 @@
 
 class Intersection {
 public:
-  glm::vec3 point;
+  glm::dvec3 point;
   Ray incident;
-  glm::vec3 normal;
+  glm::dvec3 normal;
   bool hit;
   //and a Material?
-  Intersection(glm::vec3 p, Ray i, glm::vec3 n)
+  Intersection(glm::dvec3 p, Ray i, glm::dvec3 n)
     : point(p), incident(i), normal(n) { hit=true; }
   Intersection() { hit=false; }
   bool didHit() { return hit;}

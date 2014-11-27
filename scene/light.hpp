@@ -5,9 +5,9 @@
 
 class Light {
 public:
-  glm::vec3 location;
-  glm::vec3 color;
-  Light(glm::vec3 location, glm::vec3 color)
+  glm::dvec3 location;
+  glm::dvec3 color;
+  Light(glm::dvec3 location, glm::dvec3 color)
     : location(location), color(color) { }
   Light() { }
 };

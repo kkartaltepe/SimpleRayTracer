@@ -18,12 +18,12 @@ std::vector<Triangle> triangles;
 std::vector<Light> lights;
 
 Camera camera = Camera(
-  glm::vec3(0.0f, 150.0f, -200.0f),
-  glm::vec3(0.0f, 0.0f, 0.0f),
-  glm::vec3(0.0f, 1.0f, 0.0f),
+  glm::dvec3(0.0f, 150.0f, -200.0f),
+  glm::dvec3(0.0f, 0.0f, 0.0f),
+  glm::dvec3(0.0f, 1.0f, 0.0f),
   90.0f, PROJ_WIDTH, PROJ_HEIGHT);
 
-glm::vec3 trace(Ray ray);
+glm::dvec3 trace(Ray ray);
 
 void initSceneData() {
   // triangles.push_back(Triangle(glm::vec3(50.0f, -100.0f, 100.0f),
@@ -33,12 +33,12 @@ void initSceneData() {
   //                              glm::vec3(-100.0f, -100.0f, 100.0f),
   //                              glm::vec3(100.0f, -100.0f, 100.0f)));
   triangles = loadTriangles("cube.obj");
-  lights.push_back(Light(glm::vec3(100.0f, 0.0f, -150.0f),
-                          glm::vec3(0.0f, 0.0f, 8000.0f)));
-  lights.push_back(Light(glm::vec3(-100.0f, 0.0f, -150.0f),
-                          glm::vec3(0.0f, 8000.0f, 0.0f)));
-  lights.push_back(Light(glm::vec3(0.0f, 200.0f, 0.0f),
-                          glm::vec3(8000.0f, 0.0f, 0.0f)));
+  lights.push_back(Light(glm::dvec3(100.0, 0.0, -150.0),
+                          glm::dvec3(0.0, 0.0, 8000.0)));
+  lights.push_back(Light(glm::dvec3(-100.0, 0.0, -150.0),
+                          glm::dvec3(0.0, 8000.0, 0.0)));
+  lights.push_back(Light(glm::dvec3(0.0, 200.0, 0.0),
+                          glm::dvec3(8000.0, 0.0, 0.0)));
 }
 
 void* beginTracing(void* args) {
@@ -56,10 +56,10 @@ void* beginTracing(void* args) {
 
   int index = 0;
   for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
-    glm::vec3 color = trace(*rayIter);
-    pixels[index].red = int(fminf(color.x, 1.0f)*255);
-    pixels[index].green = int(fminf(color.y, 1.0f)*255);
-    pixels[index].blue = int(fminf(color.z, 1.0f)*255);
+    glm::dvec3 color = trace(*rayIter);
+    pixels[index].red = int(fmin(color.x, 1.0)*255);
+    pixels[index].green = int(fmin(color.y, 1.0)*255);
+    pixels[index].blue = int(fmin(color.z, 1.0)*255);
     index++;
     glutPostRedisplay();
   }
@@ -94,7 +94,7 @@ Intersection getClosestIntersection(Ray ray) {
   for(std::vector<Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it) {
     Intersection inters = it->intersect(ray);
     if( inters.didHit() ) {
-      glm::vec3 lineToInters = inters.point - inters.incident.origin;
+      glm::dvec3 lineToInters = inters.point - inters.incident.origin;
       float distanceSquared = glm::dot(lineToInters, lineToInters);
       if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
         closestInters = inters;
@@ -110,16 +110,16 @@ Intersection getClosestIntersection(Ray ray) {
  * @param  ray [description]
  * @return
  */
-glm::vec3 trace(Ray ray) {
-  glm::vec3 color = glm::vec3(0.0f);
+glm::dvec3 trace(Ray ray) {
+  glm::dvec3 color = glm::dvec3(0.0f);
   Intersection inters = getClosestIntersection(ray);
   if(inters.didHit()) { //if we hit something trace to all the lights to see what color it should be.
     for(std::vector<Light>::iterator lightIter = lights.begin(); lightIter != lights.end(); ++lightIter) {
-      glm::vec3 lineToLight = lightIter->location - inters.point;
+      glm::dvec3 lineToLight = lightIter->location - inters.point;
       Ray shadowRay = Ray(inters.point, lineToLight);
       //Check if shadow ray is "inside" the triangle (fix culling)
       Intersection shadowIntersection = getClosestIntersection(shadowRay);
-      glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
+      glm::dvec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
       if(!shadowIntersection.didHit() // Nothing on path of shadow ray.
         ||  glm::dot(lineToLight, lineToLight) < glm::dot(lineToShadowRayInters, lineToShadowRayInters)) { // We hit something behind the light
           color += lightIter->color/glm::dot(lineToLight, lineToLight); //attenuate light color by inverse square.
