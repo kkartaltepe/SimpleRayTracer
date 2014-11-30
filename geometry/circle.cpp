@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <math.h>
+#include <stdio.h>
 
 #include "intersection.hpp"
 #include "ray.hpp"
@@ -19,19 +20,31 @@ public:
    * @param  ray (incoming ray)
    */
   Intersection intersect(Ray ray){
-    glm::vec3 originToCenter = center - ray.origin;
-    float projectionLength = glm::dot(ray.direction, originToCenter);
-    float distToCenterSquared = glm::dot(originToCenter, originToCenter);
+    glm::vec3 centerToOrigin = ray.origin - center;
+    float projectionLength = glm::dot(ray.direction, centerToOrigin);
+    float distToCenterSquared = glm::dot(centerToOrigin, centerToOrigin);
     float distAlongProjSquared = projectionLength*projectionLength;
     float discriminant = distAlongProjSquared - distToCenterSquared + radius*radius;
     if(discriminant < 0)
       return Intersection();
     else {
       //Find the closest intersection point by ray*d = quadratic formula
-      float distanceAlongRayPlus = sqrtf(discriminant) - projectionLength;
-      float distanceAlongRayMinus = -1.0f * sqrtf(discriminant) - projectionLength;
-      glm::vec3 intersectionPoint = ray.direction * fminf(distanceAlongRayPlus, distanceAlongRayMinus);
-      return Intersection(intersectionPoint, ray, glm::normalize(intersectionPoint-center));
+      float distanceAlongRayPlus = (-1.0f*projectionLength) + sqrtf(discriminant);
+      float distanceAlongRayMinus = (-1.0f*projectionLength) - sqrtf(discriminant);
+      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus < 0) //The ray starts and points outside the circle.
+        return Intersection();
+
+      float t;
+      if(fabs(distanceAlongRayPlus) < fabs(distanceAlongRayMinus)){
+        t = distanceAlongRayPlus;
+      } else {
+        t = distanceAlongRayMinus;
+      }
+      glm::vec3 intersectionPoint = ray.direction*t+ray.origin;
+      // printf("IntersectionPoint (%f, %f, %f)\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
+      glm::vec3 normal = glm::normalize(intersectionPoint-center);
+      // Regularize the intersection point ala http://www.cse.yorku.ca/~amana/research/regularization.pdf and shift it just outside the circle.
+      return Intersection(center+normal*(radius+0.000001f), ray, normal);
     }
   }
 };
