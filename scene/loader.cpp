@@ -24,8 +24,13 @@ SceneGraph loadScene(const char * sceneDataPath) {
       if(line[0] == 'l') { //Light
         std::vector<std::string> values = splitString(line.substr(2), std::string(" "));
         glm::vec3 location = glm::vec3(atof(values[0].c_str()), atof(values[1].c_str()), atof(values[2].c_str()));
-        glm::vec3 color = glm::vec3(atof(values[3].c_str()), atof(values[4].c_str()), atof(values[5].c_str()));
-        scene.addLight(Light(location, color));
+        glm::vec3 difColor = glm::vec3(atof(values[3].c_str()), atof(values[4].c_str()), atof(values[5].c_str()));
+        if(values.size() < 9) {
+          scene.addLight(Light(location, difColor));
+          continue;
+        }
+        glm::vec3 specColor = glm::vec3(atof(values[6].c_str()), atof(values[7].c_str()), atof(values[8].c_str()));
+        scene.addLight(Light(location, difColor, specColor));
       }
       if(line[0] == 'c') { //Circle
         std::vector<std::string> values = splitString(line.substr(2), std::string(" "));

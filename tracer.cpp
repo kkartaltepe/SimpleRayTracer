@@ -13,7 +13,7 @@ SceneGraph scene;
 glm::vec3 trace(Ray ray);
 
 void initSceneData() {
-  scene = loadScene("simple.scene");
+  scene = loadScene("data/simple.scene");
 }
 
 void* beginTracing(void* args) {
@@ -99,10 +99,17 @@ glm::vec3 trace(Ray ray) {
       glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
       float shadowRayIntersLengthSquared = glm::dot(lineToShadowRayInters, lineToShadowRayInters);
       float lineToLightLengthSquared = glm::dot(lineToLight, lineToLight);
-      if((!shadowIntersection.didHit()
-          || lineToLightLengthSquared < shadowRayIntersLengthSquared)) {// We hit something behind the light
+      if((!shadowIntersection.didHit() || lineToLightLengthSquared < shadowRayIntersLengthSquared)) {// We hit something behind the light
           float distanceTraveled = sqrtf(lineToLightLengthSquared) + glm::length(lineToEye); //used in attenuation
-          color += lightIter->color/powf(distanceTraveled, 2);
+
+          float difIntensity = glm::dot(glm::normalize(lineToLight), inters.normal);
+
+          glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); //incident is in the direction from eye, so negate
+          float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
+          float specIntensity = powf(NdotH, 12); //Spectral hardness of the material
+
+          color += lightIter->specColor*specIntensity/powf(distanceTraveled, 2);
+          color += lightIter->difColor*difIntensity/powf(distanceTraveled, 2);
       }
     }
   }
