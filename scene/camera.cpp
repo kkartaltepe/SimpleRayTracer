@@ -19,7 +19,7 @@ private:
 
 public:
   Camera(glm::vec3 location, glm::vec3 target, glm::vec3 up, float fieldOfViewDegrees, int width, int height)
-    : location(location), target(target), up(up), raysWide(width), raysHigh(height){ fieldOfView = fieldOfViewDegrees*3.14159/180; }
+    : location(location), target(target), up(up), raysWide(width), raysHigh(height){ fieldOfView = fieldOfViewDegrees*3.14159265359f/180; }
 
   std::vector<Ray> raysToCast() {
     rays.clear();

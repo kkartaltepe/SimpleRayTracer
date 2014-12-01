@@ -58,8 +58,9 @@ public:
   glm::vec3 baryOf(glm::vec3 point) {
     glm::vec3 baryCoords, p1ToPoint = point - plane.p1;
 
-    //IT FINALLY WORKS THANKS TO http://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
-    //Literally everywhere on the internet has it wrong.
+    // IT FINALLY WORKS THANKS TO http://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+    // read: http://realtimecollisiondetection.net/
+    // Literally everywhere on the internet has it wrong.
     float denom = d11*d22-pow(d12, 2);
     float uNumer = d22*glm::dot(p1ToPoint, edge1)-d12*glm::dot(p1ToPoint, edge2);
     float vNumer = d11*glm::dot(p1ToPoint, edge2)-d12*glm::dot(p1ToPoint, edge1);

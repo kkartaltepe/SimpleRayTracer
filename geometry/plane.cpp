@@ -10,20 +10,19 @@
 
 class Plane {
 public:
-  glm::vec3 p1,p2,p3;
-  Plane(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): p1(p1), p2(p2), p3(p3) { }
+  glm::vec3 p1,p2,p3,normal;
+  Plane(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): p1(p1), p2(p2), p3(p3) {
+    normal = glm::normalize(glm::cross(p2-p1, p3-p2));
+  }
   /**
    * calculate the intersection point of a ray with this plane, the plane is
    * is assumed to be defined by a clockwise winding of points.
    * @param  ray
    */
   Intersection intersect(Ray ray){
-    glm::vec3 normal = glm::normalize(glm::cross(p2-p1, p3-p1));
-    float numerator = -1.0f*(glm::dot(ray.origin, normal) + glm::dot(normal, p2)); //Times -1 to ensure clockwise windings give correct t value
+    float numerator = -1.0f*(glm::dot(ray.origin, normal) - glm::dot(normal, p2)); //Times -1 to ensure clockwise windings give correct t value
     float denominator = glm::dot(ray.direction, normal);
 
-    // printf("Testing intersection with plane composed of (%f,%f,%f),(%f,%f,%f),(%f,%f,%f)\n",
-    //   p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
 
     if(denominator == 0) { //Ray is perpendicular to the normal, does not intersect the plane unless it lays within the plane.
       return Intersection();
