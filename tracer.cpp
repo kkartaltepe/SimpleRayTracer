@@ -14,37 +14,11 @@ glm::vec3 trace(Ray ray);
 
 void initSceneData() {
   scene = loadScene("simple.scene");
-  // scene.load("cube.obj");
-  // scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, -1.5f), 0.2f));
-  // scene.addCircle(Circle(glm::vec3(0.0f, 1.5f, -1.5f), 0.2f));
-  // scene.addCircle(Circle(glm::vec3(1.5f, 0.0f, -1.5f), 0.2f));
-  // scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, 0.0f), 0.2f));
-  // scene.addLight(Light(glm::vec3(2.0f, 0.0f, -2.0f),
-  //                         glm::vec3(0.0f, 0.0f, 8.0f)));
-  // scene.addLight(Light(glm::vec3(0.0f, 2.0f, -2.0f),
-  //                         glm::vec3(0.0f, 8.0f, 0.0f)));
-  // scene.addLight(Light(glm::vec3(2.0f, 2.0f, 0.0f),
-  //                         glm::vec3(8.0f, 0.0f, 0.0f)));
-  // scene.setCamera(Camera(
-  //   glm::vec3(3.0, 3.0f, -3.0f),
-  //   glm::vec3(0.0f, 0.0f, 0.0f),
-  //   glm::vec3(0.0f, 1.0f, 0.0f),
-  //   60.0f, PROJ_WIDTH, PROJ_HEIGHT));
-
 }
 
 void* beginTracing(void* args) {
   sleep(2);
   std::vector<Ray> rays = scene.sceneCamera.raysToCast();
-  // std::vector<Ray> rays;
-  // for(int y = PROJ_HEIGHT; y > 0; --y) {
-  //   for(int x = 0; x < PROJ_WIDTH; ++x) {
-  //     Ray toCast = Ray(glm::vec3(0.0f, 0.0f, -150.0f),
-  //                      glm::vec3((float)x-PROJ_WIDTH/2.0f, (float)y-PROJ_WIDTH/2.0f, 150.0f));
-  //     // printf("from (%f,%f,%f) to (%f, %f, 0)\n", toCast.origin.x, toCast.origin.y, toCast.origin.z, toCast.direction.x, toCast.direction.y);
-  //     rays.push_back(toCast);
-  //   }
-  // }
 
   int index = 0;
   for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
@@ -121,7 +95,6 @@ glm::vec3 trace(Ray ray) {
       glm::vec3 lineToLight = lightIter->location - inters.point;
       glm::vec3 lineToEye = inters.incident.origin - inters.point; //Used in attenuation
       Ray shadowRay = Ray(inters.point, lineToLight);
-      //Check if shadow ray is "inside" the triangle (fix culling)
       Intersection shadowIntersection = getClosestIntersection(shadowRay);
       glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
       float shadowRayIntersLengthSquared = glm::dot(lineToShadowRayInters, lineToShadowRayInters);
@@ -129,7 +102,7 @@ glm::vec3 trace(Ray ray) {
       if((!shadowIntersection.didHit()
           || lineToLightLengthSquared < shadowRayIntersLengthSquared)) {// We hit something behind the light
           float distanceTraveled = sqrtf(lineToLightLengthSquared) + glm::length(lineToEye); //used in attenuation
-          color += lightIter->color/powf(distanceTraveled, 2); //Maybe attenuate light later.
+          color += lightIter->color/powf(distanceTraveled, 2);
       }
     }
   }
