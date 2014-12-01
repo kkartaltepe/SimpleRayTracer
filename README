@@ -1,2 +1,11 @@
 This is just a simple ray tracer built for fun, and to learn a bit about pthreads
 and brush up on C/C++ basics. Maybe later fiddle with OpenGL some more.
+
+Current Features:
+ - Geometry
+  * Triangles
+  * Circles
+ - Point Lights
+ - Shadows
+ - Diffuse Lighting
+ - FoV Camera
