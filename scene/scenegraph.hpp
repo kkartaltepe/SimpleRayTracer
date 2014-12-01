@@ -4,7 +4,6 @@
 #include "../display/simple.hpp"
 #include "../geometry/circle.cpp"
 #include "../geometry/triangle.cpp"
-#include "../geometry/loader.cpp"
 #include "light.hpp"
 #include "camera.cpp"
 
@@ -19,10 +18,6 @@ public:
                             glm::vec3(0.0f, 0.0f, 0.0f),
                             glm::vec3(0.0f, 1.0f, 0.0f),
                             90.0f, PROJ_WIDTH, PROJ_HEIGHT) { };
-
-  void load(const char * sceneDataPath) {
-    triangles = loadTriangles(sceneDataPath);
-  };
   void addCircle(Circle circle){
     circles.push_back(circle);
   }

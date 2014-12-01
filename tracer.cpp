@@ -6,29 +6,30 @@
 
 
 #include "display/simple.hpp"
-#include "scene/scenegraph.hpp"
+#include "scene/loader.cpp"
 
 SceneGraph scene;
 
 glm::vec3 trace(Ray ray);
 
 void initSceneData() {
-  scene.load("cube.obj");
-  scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, -1.5f), 0.2f));
-  scene.addCircle(Circle(glm::vec3(0.0f, 1.5f, -1.5f), 0.2f));
-  scene.addCircle(Circle(glm::vec3(1.5f, 0.0f, -1.5f), 0.2f));
-  scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, 0.0f), 0.2f));
-  scene.addLight(Light(glm::vec3(2.0f, 0.0f, -2.0f),
-                          glm::vec3(0.0f, 0.0f, 8.0f)));
-  scene.addLight(Light(glm::vec3(0.0f, 2.0f, -2.0f),
-                          glm::vec3(0.0f, 8.0f, 0.0f)));
-  scene.addLight(Light(glm::vec3(2.0f, 2.0f, 0.0f),
-                          glm::vec3(8.0f, 0.0f, 0.0f)));
-  scene.setCamera(Camera(
-    glm::vec3(3.0, 3.0f, -3.0f),
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f),
-    60.0f, PROJ_WIDTH, PROJ_HEIGHT));
+  scene = loadScene("simple.scene");
+  // scene.load("cube.obj");
+  // scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, -1.5f), 0.2f));
+  // scene.addCircle(Circle(glm::vec3(0.0f, 1.5f, -1.5f), 0.2f));
+  // scene.addCircle(Circle(glm::vec3(1.5f, 0.0f, -1.5f), 0.2f));
+  // scene.addCircle(Circle(glm::vec3(1.5f, 1.5f, 0.0f), 0.2f));
+  // scene.addLight(Light(glm::vec3(2.0f, 0.0f, -2.0f),
+  //                         glm::vec3(0.0f, 0.0f, 8.0f)));
+  // scene.addLight(Light(glm::vec3(0.0f, 2.0f, -2.0f),
+  //                         glm::vec3(0.0f, 8.0f, 0.0f)));
+  // scene.addLight(Light(glm::vec3(2.0f, 2.0f, 0.0f),
+  //                         glm::vec3(8.0f, 0.0f, 0.0f)));
+  // scene.setCamera(Camera(
+  //   glm::vec3(3.0, 3.0f, -3.0f),
+  //   glm::vec3(0.0f, 0.0f, 0.0f),
+  //   glm::vec3(0.0f, 1.0f, 0.0f),
+  //   60.0f, PROJ_WIDTH, PROJ_HEIGHT));
 
 }
 
