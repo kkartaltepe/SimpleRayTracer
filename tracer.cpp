@@ -13,7 +13,13 @@ SceneGraph scene;
 glm::vec3 trace(Ray ray);
 
 void initSceneData() {
-  scene = loadScene("data/simple.scene");
+  scene = loadScene("data/room.obj");
+  scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
+                         glm::vec3(0.0f, 1.5f, -1.5f),
+                         glm::vec3(0.0f, 1.0f, 0.0f),
+                         60.0f, 512, 512));
+  scene.addLight(Light(glm::vec3(0.0f, 2.0f, -1.5f),
+                       glm::vec3(10.0f, 10.0f, 10.0f)));
 }
 
 void* beginTracing(void* args) {
@@ -106,7 +112,7 @@ glm::vec3 trace(Ray ray) {
 
           glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); //incident is in the direction from eye, so negate
           float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
-          float specIntensity = powf(NdotH, 12); //Spectral hardness of the material
+          float specIntensity = powf(NdotH, 32); //Spectral hardness of the material
 
           color += lightIter->specColor*specIntensity/powf(distanceTraveled, 2);
           color += lightIter->difColor*difIntensity/powf(distanceTraveled, 2);
