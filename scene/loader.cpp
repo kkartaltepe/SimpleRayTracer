@@ -24,7 +24,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph currentScene) {
           curMaterial = new Material(values[1]);
         else{
           currentScene.addMaterial(*curMaterial);
-          *curMaterial = Material();
+          *curMaterial = Material(values[1]);
         }
       }
       if(values[0] == "Ns") { // Specular Hardness
