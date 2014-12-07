@@ -63,27 +63,30 @@ int main(int argc, char** argv) {
 Intersection getClosestIntersection(Ray ray) {
   Intersection closestInters = Intersection();
   float closestDistanceSquared = 0.0f;
-  for(std::vector<Triangle>::iterator it = scene.triangles.begin(); it != scene.triangles.end(); ++it) {
-    Intersection inters = it->intersect(ray);
-    if( inters.didHit() ) {
-      glm::vec3 lineToInters = inters.point - inters.incident.origin;
-      float distanceSquared = glm::dot(lineToInters, lineToInters);
-      if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
-        closestInters = inters;
-        closestDistanceSquared = distanceSquared;
+  for(std::vector<Object>::iterator obj = scene.objects.begin(); obj != scene.objects.end(); ++obj) {
+    for(std::vector<Triangle>::iterator tri = obj->triangles.begin(); tri != obj->triangles.end(); ++tri) {
+      Intersection inters = tri->intersect(ray);
+      if( inters.didHit() ) {
+        glm::vec3 lineToInters = inters.point - inters.incident.origin;
+        float distanceSquared = glm::dot(lineToInters, lineToInters);
+        if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
+          closestInters = inters;
+          closestDistanceSquared = distanceSquared;
+        }
       }
     }
-  }
-  for(std::vector<Circle>::iterator it = scene.circles.begin(); it != scene.circles.end(); ++it) {
-    Intersection inters = it->intersect(ray);
-    if( inters.didHit() ) {
-      glm::vec3 lineToInters = inters.point - inters.incident.origin;
-      float distanceSquared = glm::dot(lineToInters, lineToInters);
-      if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
-        closestInters = inters;
-        closestDistanceSquared = distanceSquared;
+    for(std::vector<Circle>::iterator circ = obj->circles.begin(); circ != obj->circles.end(); ++circ) {
+      Intersection inters = circ->intersect(ray);
+      if( inters.didHit() ) {
+        glm::vec3 lineToInters = inters.point - inters.incident.origin;
+        float distanceSquared = glm::dot(lineToInters, lineToInters);
+        if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
+          closestInters = inters;
+          closestDistanceSquared = distanceSquared;
+        }
       }
     }
+
   }
   return closestInters;
 }

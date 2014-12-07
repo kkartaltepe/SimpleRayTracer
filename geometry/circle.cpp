@@ -19,7 +19,7 @@ public:
    * calculate the intersection point of a ray with a circle
    * @param  ray (incoming ray)
    */
-  Intersection intersect(Ray ray){
+  Intersection intersect(Ray ray) const{
     glm::vec3 centerToOrigin = ray.origin - center;
     float projectionLength = glm::dot(ray.direction, centerToOrigin);
     float distToCenterSquared = glm::dot(centerToOrigin, centerToOrigin);

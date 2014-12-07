@@ -19,7 +19,7 @@ public:
    * is assumed to be defined by a clockwise winding of points.
    * @param  ray
    */
-  Intersection intersect(Ray ray){
+  Intersection intersect(Ray ray) const{
     float numerator = -1.0f*(glm::dot(ray.origin, normal) - glm::dot(normal, p2)); //Times -1 to ensure clockwise windings give correct t value
     float denominator = glm::dot(ray.direction, normal);
 

@@ -35,7 +35,7 @@ public:
    * calculate the intersection point of a ray with this plane
    * @param  ray
    */
-  Intersection intersect(Ray ray){
+  Intersection intersect(Ray ray) const{
     Intersection intersection = plane.intersect(ray);
     if(!intersection.didHit()) //It didnt hit the plane
       return intersection;
@@ -55,7 +55,7 @@ public:
    * @param  point
    * @return
    */
-  glm::vec3 baryOf(glm::vec3 point) {
+  glm::vec3 baryOf(glm::vec3 point) const{
     glm::vec3 baryCoords, p1ToPoint = point - plane.p1;
 
     // IT FINALLY WORKS THANKS TO http://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates

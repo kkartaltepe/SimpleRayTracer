@@ -62,7 +62,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph currentScene) {
  */
 SceneGraph loadScene(std::string sceneDataPath) {
   std::vector<glm::vec3> vertices;
-  std::string curMaterial = "None";
+  Object* curObject = NULL;
   SceneGraph scene;
   std::ifstream sceneDataStream(sceneDataPath.c_str(), std::ios::in);
 
@@ -75,9 +75,6 @@ SceneGraph loadScene(std::string sceneDataPath) {
       if(values[0] == "mtllib") { //Load a some materials
         std::string currentDirectory = sceneDataPath.substr(0, sceneDataPath.find_last_of("/\\")+1);
         loadMaterials(currentDirectory+values[1], scene);
-      }
-      if(values[0] == "usemtl") { // set the material for the prespecified object.
-        std::string curMaterial = values[1];
       }
       if(values[0] == "l") { //Light
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
@@ -97,6 +94,17 @@ SceneGraph loadScene(std::string sceneDataPath) {
         int raysWide = atof(values[11].c_str()), raysHigh = atof(values[12].c_str());
         scene.setCamera(Camera(location, target, up, fov, raysWide, raysHigh));
       }
+      if(values[0] == "o") {// Describes a new object.
+        if(!curObject)
+          curObject = new Object(values[1]);
+          else{
+            scene.addObject(*curObject);
+            *curObject = Object(values[1]);
+          }
+      }
+      if(values[0] == "usemtl") { // set the material for the current object.
+        curObject->material = scene.getMaterial(values[1]);
+      }
       if(values[0] == "v") {//Describes a vertex
         float first = atof(values[1].c_str()), second = atof(values[2].c_str()), third = atof(values[3].c_str());
         glm::vec3 vertex = glm::vec3(first, second, third);
@@ -104,16 +112,19 @@ SceneGraph loadScene(std::string sceneDataPath) {
       }
       if(values[0] == "f") {//Describes a face, follows after vertices in file.
         int first = atoi(values[1].c_str()), second = atoi(values[2].c_str()), third = atoi(values[3].c_str());
-        scene.addTriangle(Triangle(vertices[first-1], vertices[second-1], vertices[third-1]));
+        curObject->triangles.push_back(Triangle(vertices[first-1], vertices[second-1], vertices[third-1]));
       }
       if(values[0] == "c") { //Circle
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
         float radius = atof(values[4].c_str());
-        scene.addCircle(Circle(location, radius));
+        curObject->circles.push_back(Circle(location, radius));
       }
     }
     sceneDataStream.close();
   } else { printf("Failed to load mesh data from '%s'\n", sceneDataPath.c_str()); }
+  if(curObject)
+    scene.addObject(*curObject);
+    delete curObject;
   return scene;
 }
 
