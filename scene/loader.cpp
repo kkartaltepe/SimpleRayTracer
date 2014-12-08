@@ -8,7 +8,7 @@
 std::vector<std::string> splitString(std::string input, std::string delimiter);
 
 
-void loadMaterials(std::string mtlFileName, SceneGraph currentScene) {
+void loadMaterials(std::string mtlFileName, SceneGraph *currentScene) {
   std::ifstream mtlDataStream(mtlFileName.c_str(), std::ios::in);
 
   if(mtlDataStream.is_open()) {
@@ -23,7 +23,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph currentScene) {
         if(!curMaterial)
           curMaterial = new Material(values[1]);
         else{
-          currentScene.addMaterial(*curMaterial);
+          currentScene->addMaterial(*curMaterial);
           *curMaterial = Material(values[1]);
         }
       }
@@ -47,7 +47,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph currentScene) {
       }
     }
     if(curMaterial)
-      currentScene.addMaterial(*curMaterial);
+      currentScene->addMaterial(*curMaterial);
     delete curMaterial;
   } else {
     printf("Failed to open material data at %s\n", mtlFileName.c_str());
@@ -74,17 +74,12 @@ SceneGraph loadScene(std::string sceneDataPath) {
       std::vector<std::string> values = splitString(line, std::string(" "));
       if(values[0] == "mtllib") { //Load a some materials
         std::string currentDirectory = sceneDataPath.substr(0, sceneDataPath.find_last_of("/\\")+1);
-        loadMaterials(currentDirectory+values[1], scene);
+        loadMaterials(currentDirectory+values[1], &scene);
       }
       if(values[0] == "l") { //Light
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
-        glm::vec3 difColor = glm::vec3(atof(values[4].c_str()), atof(values[5].c_str()), atof(values[6].c_str()));
-        if(values.size() < 10) {
-          scene.addLight(Light(location, difColor));
-          continue;
-        }
-        glm::vec3 specColor = glm::vec3(atof(values[7].c_str()), atof(values[8].c_str()), atof(values[9].c_str()));
-        scene.addLight(Light(location, difColor, specColor));
+        glm::vec3 color = glm::vec3(atof(values[4].c_str()), atof(values[5].c_str()), atof(values[6].c_str()));
+        scene.addLight(Light(location, color));
       }
       if(values[0] == "r") { //cameRa
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));

@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <vector>
 
-
 #include "display/simple.hpp"
 #include "scene/loader.cpp"
 
@@ -19,7 +18,7 @@ void initSceneData() {
                          glm::vec3(0.0f, 1.0f, 0.0f),
                          60.0f, 512, 512));
   scene.addLight(Light(glm::vec3(0.0f, 2.0f, -1.5f),
-                       glm::vec3(10.0f, 10.0f, 10.0f)));
+                       glm::vec3(20.0f, 20.0f, 20.0f)));
 }
 
 void* beginTracing(void* args) {
@@ -71,6 +70,7 @@ Intersection getClosestIntersection(Ray ray) {
         float distanceSquared = glm::dot(lineToInters, lineToInters);
         if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
           closestInters = inters;
+          closestInters.object = &*obj;
           closestDistanceSquared = distanceSquared;
         }
       }
@@ -82,6 +82,7 @@ Intersection getClosestIntersection(Ray ray) {
         float distanceSquared = glm::dot(lineToInters, lineToInters);
         if( distanceSquared < closestDistanceSquared || !closestInters.didHit()) {
           closestInters = inters;
+          closestInters.object = &*obj;
           closestDistanceSquared = distanceSquared;
         }
       }
@@ -115,10 +116,11 @@ glm::vec3 trace(Ray ray) {
 
           glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); //incident is in the direction from eye, so negate
           float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
-          float specIntensity = powf(NdotH, 32); //Spectral hardness of the material
+          float specIntensity = powf(NdotH, inters.object->material.specHardness); //Spectral hardness of the material
 
-          color += lightIter->specColor*specIntensity/powf(distanceTraveled, 2);
-          color += lightIter->difColor*difIntensity/powf(distanceTraveled, 2);
+          color += inters.object->material.aColor;
+          color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(distanceTraveled, 2);
+          color += (lightIter->color * inters.object->material.dColor)*difIntensity/powf(distanceTraveled, 2);
       }
     }
   }

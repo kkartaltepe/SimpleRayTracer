@@ -4,11 +4,14 @@
 
 #include "ray.hpp"
 
+class Object; //forward declaration of object to prevent circular inclusions
+
 class Intersection {
 public:
   glm::vec3 point;
   Ray incident;
   glm::vec3 normal;
+  Object* object;
   bool hit;
   //and a Material?
   Intersection(glm::vec3 p, Ray i, glm::vec3 n)

@@ -26,7 +26,7 @@ public:
   }
   void addLight(Light light) {
     lights.push_back(light);
-  };
+  }
   void addMaterial(Material material) {
     materials[material.name] = material;
   }
@@ -35,7 +35,7 @@ public:
   }
   void setCamera(Camera camera) {
     sceneCamera = camera;
-  };
+  }
 };
 
 #endif /* end of include guard: SCENEGRAPH_HPP */
