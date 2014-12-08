@@ -79,7 +79,8 @@ SceneGraph loadScene(std::string sceneDataPath) {
       if(values[0] == "l") { //Light
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
         glm::vec3 color = glm::vec3(atof(values[4].c_str()), atof(values[5].c_str()), atof(values[6].c_str()));
-        scene.addLight(Light(location, color));
+        float power = atof(values[7].c_str());
+        scene.addLight(Light(location, color, power));
       }
       if(values[0] == "r") { //cameRa
         glm::vec3 location = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));

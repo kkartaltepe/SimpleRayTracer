@@ -18,7 +18,7 @@ void initSceneData() {
                          glm::vec3(0.0f, 1.0f, 0.0f),
                          60.0f, 512, 512));
   scene.addLight(Light(glm::vec3(0.0f, 2.0f, -1.5f),
-                       glm::vec3(20.0f, 20.0f, 20.0f)));
+                       glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
 }
 
 void* beginTracing(void* args) {
@@ -112,11 +112,11 @@ glm::vec3 trace(Ray ray) {
       if((!shadowIntersection.didHit() || lineToLightLengthSquared < shadowRayIntersLengthSquared)) {// We hit something behind the light
           float distanceTraveled = sqrtf(lineToLightLengthSquared) + glm::length(lineToEye); //used in attenuation
 
-          float difIntensity = glm::dot(glm::normalize(lineToLight), inters.normal);
+          float difIntensity = glm::dot(glm::normalize(lineToLight), inters.normal)*lightIter->power;
 
           glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); //incident is in the direction from eye, so negate
           float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
-          float specIntensity = powf(NdotH, inters.object->material.specHardness); //Spectral hardness of the material
+          float specIntensity = powf(NdotH, inters.object->material.specHardness)*lightIter->power; //Spectral hardness of the material
 
           color += inters.object->material.aColor;
           color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(distanceTraveled, 2);
