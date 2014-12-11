@@ -14,13 +14,13 @@ SceneGraph scene;
 glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth);
 
 void initSceneData() {
-  scene = loadScene("data/room.obj");
-  scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
-                         glm::vec3(0.0f, 1.5f, -1.5f),
-                         glm::vec3(0.0f, 1.0f, 0.0f),
-                         60.0f, 512, 512));
-  scene.addLight(Light(glm::vec3(0.0f, 2.0f, -1.5f),
-                       glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
+  scene = loadScene("data/floor.scene");
+  // scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
+  //                        glm::vec3(0.0f, 1.5f, -1.5f),
+  //                        glm::vec3(0.0f, 1.0f, 0.0f),
+  //                        60.0f, 512, 512));
+  // scene.addLight(Light(glm::vec3(0.0f, 2.0f, -1.5f),
+  //                      glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
 }
 
 void* beginTracing(void* args) {
