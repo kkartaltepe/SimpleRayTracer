@@ -11,6 +11,8 @@ public:
   float reflectivity, refractiveIndex, opacity;
   int specHardness;
   Material(){
+    dColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    reflectivity = 0;
     specHardness = 0;
     refractiveIndex = 0;
     opacity = 0;

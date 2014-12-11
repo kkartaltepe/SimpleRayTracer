@@ -28,11 +28,11 @@ public:
       return Intersection();
     } else { //The ray intersects the plane, at numerator/denominator*ray.
       float t = numerator/denominator;
-      if(t > 0) //Infront of the ray.
-        return Intersection(ray.direction*t + ray.origin, ray, normal);
-      else { //Behind the ray.
+      glm::vec3 intersectionPoint = ray.direction*t + ray.origin;
+      if(t > 0)
+        return Intersection(intersectionPoint, ray, fabs(t), normal);
+      else
         return Intersection();
-      }
     }
   }
 };

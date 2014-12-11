@@ -46,7 +46,7 @@ public:
       // printf("IntersectionPoint (%f, %f, %f)\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
       glm::vec3 normal = glm::normalize(intersectionPoint-center);
       // Regularize the intersection point ala http://www.cse.yorku.ca/~amana/research/regularization.pdf and shift it just outside the circle.
-      return Intersection(center+normal*(radius+0.000001f), ray, normal);
+      return Intersection(center+normal*(radius+0.000001f), ray, fabs(t), normal);
     }
   }
 };
