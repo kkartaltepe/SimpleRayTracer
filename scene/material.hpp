@@ -7,8 +7,8 @@
 class Material {
 public:
   std::string name;
-  glm::vec3 dColor, sColor, aColor;
-  float refractiveIndex, opacity;
+  glm::vec3 dColor, sColor, aColor, rColor;
+  float reflectivity, refractiveIndex, opacity;
   int specHardness;
   Material(){
     specHardness = 0;

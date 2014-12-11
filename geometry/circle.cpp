@@ -31,15 +31,17 @@ public:
       //Find the closest intersection point by ray*d = quadratic formula
       float distanceAlongRayPlus = (-1.0f*projectionLength) + sqrtf(discriminant);
       float distanceAlongRayMinus = (-1.0f*projectionLength) - sqrtf(discriminant);
+      float t;
+
       if(distanceAlongRayPlus < 0 && distanceAlongRayMinus < 0) //The ray starts and points outside the circle.
         return Intersection();
-
-      float t;
-      if(fabs(distanceAlongRayPlus) < fabs(distanceAlongRayMinus)){
-        t = distanceAlongRayPlus;
-      } else {
+      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus > 0) //The ray starts inside the circle!
         t = distanceAlongRayMinus;
-      }
+      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus < 0) //The ray starts inside the circle!
+        t = distanceAlongRayPlus;
+      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus > 0) //The ray starts outside the circle but intersects twice.
+        t = fminf(distanceAlongRayPlus, distanceAlongRayMinus);
+
       glm::vec3 intersectionPoint = ray.direction*t+ray.origin;
       // printf("IntersectionPoint (%f, %f, %f)\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
       glm::vec3 normal = glm::normalize(intersectionPoint-center);

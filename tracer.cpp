@@ -9,7 +9,9 @@
 
 SceneGraph scene;
 
-glm::vec3 trace(Ray ray);
+#define MAX_DEPTH 2
+
+glm::vec3 trace(Ray ray, int maxDepth);
 
 void initSceneData() {
   scene = loadScene("data/room.obj");
@@ -27,7 +29,7 @@ void* beginTracing(void* args) {
 
   int index = 0;
   for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
-    glm::vec3 color = trace(*rayIter);
+    glm::vec3 color = trace(*rayIter, MAX_DEPTH);
     pixels[index].red = int(fminf(color.x, 1.0f)*255);
     pixels[index].green = int(fminf(color.y, 1.0f)*255);
     pixels[index].blue = int(fminf(color.z, 1.0f)*255);
@@ -59,10 +61,13 @@ int main(int argc, char** argv) {
  * @param  ray [description]
  * @return
  */
-Intersection getClosestIntersection(Ray ray) {
+Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
   Intersection closestInters = Intersection();
   float closestDistanceSquared = 0.0f;
   for(std::vector<Object>::iterator obj = scene.objects.begin(); obj != scene.objects.end(); ++obj) {
+    if(obj->material.opacity < 1.0f && isShadowRay)
+      continue;
+
     for(std::vector<Triangle>::iterator tri = obj->triangles.begin(); tri != obj->triangles.end(); ++tri) {
       Intersection inters = tri->intersect(ray);
       if( inters.didHit() ) {
@@ -97,30 +102,39 @@ Intersection getClosestIntersection(Ray ray) {
  * @param  ray [description]
  * @return
  */
-glm::vec3 trace(Ray ray) {
+glm::vec3 trace(Ray ray, int maxDepth) {
   glm::vec3 color = glm::vec3(0.0f);
-  Intersection inters = getClosestIntersection(ray);
+  Intersection inters = getClosestIntersection(ray, false);
   if(inters.didHit()) { //if we hit something trace to all the lights to see what color it should be.
     for(std::vector<Light>::iterator lightIter = scene.lights.begin(); lightIter != scene.lights.end(); ++lightIter) {
       glm::vec3 lineToLight = lightIter->location - inters.point;
       glm::vec3 lineToEye = inters.incident.origin - inters.point; //Used in attenuation
       Ray shadowRay = Ray(inters.point, lineToLight);
-      Intersection shadowIntersection = getClosestIntersection(shadowRay);
+      Intersection shadowIntersection = getClosestIntersection(shadowRay, true);
       glm::vec3 lineToShadowRayInters = shadowIntersection.incident.origin - shadowIntersection.point;
       float shadowRayIntersLengthSquared = glm::dot(lineToShadowRayInters, lineToShadowRayInters);
       float lineToLightLengthSquared = glm::dot(lineToLight, lineToLight);
       if((!shadowIntersection.didHit() || lineToLightLengthSquared < shadowRayIntersLengthSquared)) {// We hit something behind the light
-          float distanceTraveled = sqrtf(lineToLightLengthSquared) + glm::length(lineToEye); //used in attenuation
+        float distanceTraveled = sqrtf(lineToLightLengthSquared) + glm::length(lineToEye); // used in attenuation
 
-          float difIntensity = glm::dot(glm::normalize(lineToLight), inters.normal)*lightIter->power;
+        float difIntensity = glm::dot(glm::normalize(lineToLight), inters.normal)*lightIter->power;
 
-          glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); //incident is in the direction from eye, so negate
-          float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
-          float specIntensity = powf(NdotH, inters.object->material.specHardness)*lightIter->power; //Spectral hardness of the material
+        glm::vec3 halfAngle = glm::normalize(glm::normalize(lineToLight) - inters.incident.direction); // incident is in the direction from eye, so negate
+        float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
+        float specIntensity = powf(NdotH, inters.object->material.specHardness)*lightIter->power; // Spectral hardness of the material
 
-          color += inters.object->material.aColor;
-          color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(distanceTraveled, 2);
-          color += (lightIter->color * inters.object->material.dColor)*difIntensity/powf(distanceTraveled, 2);
+        // if(inters.object->material.opacity < 1.0f) {
+        //   color += trace(Ray(inters.point+inters.incident.direction*0.00001f,inters.incident.direction))*inters.object->material.opacity;
+        // }
+        if(inters.object->material.reflectivity > 0.0f && maxDepth > 0) {
+          glm::vec3 projOntoNorm = glm::dot(inters.incident.direction, inters.normal)*inters.normal;
+          glm::vec3 reflectDir = inters.incident.direction - projOntoNorm*2.0f;
+          color += trace(Ray(inters.point + reflectDir * 0.00001f, reflectDir), maxDepth-1)*inters.object->material.rColor*inters.object->material.reflectivity;
+        }
+
+        color += inters.object->material.aColor;
+        color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(distanceTraveled, 2);
+        color += (lightIter->color * inters.object->material.dColor)*difIntensity/powf(distanceTraveled, 2);
       }
     }
   }

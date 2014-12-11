@@ -28,7 +28,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph *currentScene) {
         }
       }
       if(values[0] == "Ns") { // Specular Hardness
-        curMaterial->specHardness = atof(values[1].c_str());
+        curMaterial->specHardness = floor(atof(values[1].c_str()));
       }
       if(values[0] == "Ka") { // Ambient Component
         curMaterial->aColor = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
@@ -38,6 +38,12 @@ void loadMaterials(std::string mtlFileName, SceneGraph *currentScene) {
       }
       if(values[0] == "Ks") { // Specular Component
         curMaterial->sColor = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
+      }
+      if(values[0] == "Nr") { // Reflectivity
+        curMaterial->reflectivity = atof(values[1].c_str());
+      }
+      if(values[0] == "Kr") { // Reflective color
+        curMaterial->rColor = glm::vec3(atof(values[1].c_str()), atof(values[2].c_str()), atof(values[3].c_str()));
       }
       if(values[0] == "d") { // Opacity
         curMaterial->opacity = atof(values[1].c_str());

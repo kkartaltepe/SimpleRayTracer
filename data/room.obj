@@ -92,3 +92,6 @@ usemtl quarterGrey
 s off
 f 34 36 35
 f 33 34 35
+o newBall_Sphere
+c 0.75 2.0 0.5 0.4
+usemtl shinyYellow
