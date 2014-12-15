@@ -30,7 +30,7 @@ public:
       float t = numerator/denominator;
       glm::vec3 intersectionPoint = ray.direction*t+ ray.origin;
       if(t > 0)
-        return Intersection(intersectionPoint+(normal*0.000001f), ray, fabs(t), normal);
+        return Intersection(intersectionPoint+(normal*0.000001f), ray, fabs(t), normal, denominator > 1);
       else
         return Intersection();
     }

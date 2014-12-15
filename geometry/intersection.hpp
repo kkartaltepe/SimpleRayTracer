@@ -13,10 +13,10 @@ public:
   float distanceTraveled;
   glm::vec3 normal;
   Object* object;
-  bool hit;
+  bool hit, inside;
   //and a Material?
-  Intersection(glm::vec3 p, Ray i, float distance, glm::vec3 n)
-    : point(p), incident(i), distanceTraveled(distance), normal(n) { hit=true; }
+  Intersection(glm::vec3 p, Ray i, float distance, glm::vec3 n, bool inside)
+    : point(p), incident(i), distanceTraveled(distance), normal(n), inside(inside) { hit=true; }
   Intersection() { hit=false; }
   bool didHit() { return hit;}
 };

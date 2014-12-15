@@ -9,7 +9,7 @@
 
 SceneGraph scene;
 
-#define MAX_DEPTH 4
+#define MAX_DEPTH 12
 
 glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth);
 
@@ -93,18 +93,36 @@ Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
  * @return
  */
 glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth) {
+  // if(maxDepth == 0) {
+  //   printf("Reached 4 recursions\n");
+  // }
   glm::vec3 color = glm::vec3(0.0f);
   Intersection inters = getClosestIntersection(ray, false);
   if(inters.didHit()) { //if we hit something trace to all the lights to see what color it should be.
     color += inters.object->material.aColor;
 
     if(inters.object->material.opacity < 1.0f  && maxDepth > 0) {
-      color += trace(Ray(inters.point+inters.incident.direction*0.00003f, inters.incident.direction), inters.distanceTraveled+distanceTraveled, maxDepth-1)*(1.0f-inters.object->material.opacity);
+      float rRatio;
+      float cosTheta = glm::dot(inters.incident.direction, inters.normal);
+      float shift = 0.00002f;
+      if(inters.inside) {
+        rRatio = inters.object->material.refractiveIndex;
+        cosTheta *= -1.0f;
+      }
+      else {
+        rRatio = 1.0f/inters.object->material.refractiveIndex;
+        shift *= -1.0f;
+      }
+
+      float antiCos = sqrtf(1.0f - (1.0f-cosTheta*cosTheta)*rRatio*rRatio);
+      // printf("refraction with ratio: %f, cos: %f, antiCos: %f\n", rRatio, cosTheta, antiCos);
+      glm::vec3 refractedDir = rRatio*inters.incident.direction + (cosTheta*rRatio + antiCos)*inters.normal;
+      color += trace(Ray(inters.point+inters.normal*shift, refractedDir), inters.distanceTraveled+distanceTraveled, maxDepth-1)*(1.0f-inters.object->material.opacity);
     }
 
     if(inters.object->material.reflectivity > 0.0f && maxDepth > 0) {
-      glm::vec3 projOntoNorm = glm::dot(inters.incident.direction, inters.normal)*inters.normal;
-      glm::vec3 reflectDir = inters.incident.direction - projOntoNorm*2.0f;
+      glm::vec3 projOntoNorm = -glm::dot(inters.incident.direction, inters.normal)*inters.normal;
+      glm::vec3 reflectDir = inters.incident.direction + projOntoNorm*2.0f;
       color += trace(Ray(inters.point, reflectDir), inters.distanceTraveled+distanceTraveled, maxDepth-1)*inters.object->material.rColor*inters.object->material.reflectivity;
     }
 

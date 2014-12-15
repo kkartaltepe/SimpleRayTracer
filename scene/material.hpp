@@ -18,9 +18,10 @@ public:
     opacity = 1.0;
   }
   Material(std::string name): name(name){
+    reflectivity = 0;
     specHardness = 0;
     refractiveIndex = 1.0;
-    opacity = 1.0;;
+    opacity = 1.0;
   }
   Material(std::string name, glm::vec3 dColor, glm::vec3 sColor, glm::vec3 aColor, float _specHardness, float _refractiveIndex, int _opacity):
     name(name), dColor(dColor), sColor(sColor), aColor(aColor){

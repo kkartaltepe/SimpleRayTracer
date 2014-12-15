@@ -32,21 +32,26 @@ public:
       float distanceAlongRayPlus = (-1.0f*projectionLength) + sqrtf(discriminant);
       float distanceAlongRayMinus = (-1.0f*projectionLength) - sqrtf(discriminant);
       float t;
+      bool inside = false;
 
-      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus < 0) //The ray starts and points outside the circle.
+      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus < 0) // The ray starts past the circle.
         return Intersection();
-      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus > 0) //The ray starts inside the circle!
+      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus > 0){ // The ray starts inside the circle!
         t = distanceAlongRayMinus;
-      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus < 0) //The ray starts inside the circle!
+        inside = true;
+      }
+      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus < 0){ // The ray starts inside the circle!
         t = distanceAlongRayPlus;
-      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus > 0) //The ray starts outside the circle but intersects twice.
+        inside = true;
+      }
+      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus > 0) // The ray starts outside the circle and intersects the circle.
         t = fminf(distanceAlongRayPlus, distanceAlongRayMinus);
 
       glm::vec3 intersectionPoint = ray.direction*t+ray.origin;
       // printf("IntersectionPoint (%f, %f, %f)\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
       glm::vec3 normal = glm::normalize(intersectionPoint-center);
       // Regularize the intersection point ala http://www.cse.yorku.ca/~amana/research/regularization.pdf and shift it just outside the circle.
-      return Intersection(center+normal*(radius+0.000001f), ray, fabs(t), normal);
+      return Intersection(center+normal*(radius+0.000001f), ray, fabs(t), normal, inside);
     }
   }
 };
