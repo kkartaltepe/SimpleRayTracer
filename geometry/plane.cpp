@@ -28,9 +28,9 @@ public:
       return Intersection();
     } else { //The ray intersects the plane, at numerator/denominator*ray.
       float t = numerator/denominator;
-      glm::vec3 intersectionPoint = ray.direction*t + ray.origin;
+      glm::vec3 intersectionPoint = ray.direction*t+ ray.origin;
       if(t > 0)
-        return Intersection(intersectionPoint, ray, fabs(t), normal);
+        return Intersection(intersectionPoint+(normal*0.000001f), ray, fabs(t), normal);
       else
         return Intersection();
     }
