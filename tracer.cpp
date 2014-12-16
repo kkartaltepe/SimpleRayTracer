@@ -68,6 +68,7 @@ Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
       Intersection inters = tri->intersect(ray);
       if( inters.didHit() ) {
         if( inters.distanceTraveled < closestInters.distanceTraveled || !closestInters.didHit() ) {
+
           closestInters = inters;
           closestInters.object = &*obj;
         }
@@ -77,6 +78,7 @@ Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
       Intersection inters = circ->intersect(ray);
       if( inters.didHit() ) {
         if( inters.distanceTraveled < closestInters.distanceTraveled || !closestInters.didHit() ) {
+
           closestInters = inters;
           closestInters.object = &*obj;
         }
@@ -98,55 +100,57 @@ glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth) {
   // }
   glm::vec3 color = glm::vec3(0.0f);
   Intersection inters = getClosestIntersection(ray, false);
-  if(inters.didHit()) { //if we hit something trace to all the lights to see what color it should be.
-    color += inters.object->material.aColor;
+  if(inters.didHit()) { //if we hit something figure out the color.
 
-    if(inters.object->material.opacity < 1.0f  && maxDepth > 0) {
+    color += inters.object->material.aColor; // Ambient lighting.
+
+    if(inters.object->material.opacity < 1.0f  && maxDepth > 0) { // Transmitted light
       float rRatio;
       float cosTheta = glm::dot(inters.incident.direction, inters.normal);
-      float shift = 0.00002f;
       if(inters.inside) {
         rRatio = inters.object->material.refractiveIndex;
         cosTheta *= -1.0f;
       }
       else {
         rRatio = 1.0f/inters.object->material.refractiveIndex;
-        shift *= -1.0f;
       }
 
       float antiCos = sqrtf(1.0f - (1.0f-cosTheta*cosTheta)*rRatio*rRatio);
       // printf("refraction with ratio: %f, cos: %f, antiCos: %f\n", rRatio, cosTheta, antiCos);
       glm::vec3 refractedDir = rRatio*inters.incident.direction + (cosTheta*rRatio + antiCos)*inters.normal;
-      color += trace(Ray(inters.point+inters.normal*shift, refractedDir), inters.distanceTraveled+distanceTraveled, maxDepth-1)*(1.0f-inters.object->material.opacity);
+      color += trace(Ray(inters.point, refractedDir), inters.distanceTraveled+distanceTraveled, maxDepth-1)*(1.0f-inters.object->material.opacity);
     }
 
-    if(inters.object->material.reflectivity > 0.0f && maxDepth > 0) {
+    if(inters.object->material.reflectivity > 0.0f && maxDepth > 0) { // Reflected light
       glm::vec3 projOntoNorm = -glm::dot(inters.incident.direction, inters.normal)*inters.normal;
       glm::vec3 reflectDir = inters.incident.direction + projOntoNorm*2.0f;
       color += trace(Ray(inters.point, reflectDir), inters.distanceTraveled+distanceTraveled, maxDepth-1)*inters.object->material.rColor*inters.object->material.reflectivity;
     }
 
-    for(std::vector<Light>::iterator lightIter = scene.lights.begin(); lightIter != scene.lights.end(); ++lightIter) {
-      glm::vec3 lightDir = lightIter->location - inters.point;
-      float distanceToLight = glm::length(lightDir);
-      lightDir = glm::normalize(lightDir);
+    if(!inters.inside) { // GLORIOUS IMPROVEMENTS, Diffuse light
+      for(std::vector<Light>::iterator lightIter = scene.lights.begin(); lightIter != scene.lights.end(); ++lightIter) {
+        glm::vec3 lightDir = lightIter->location - inters.point;
+        float distanceToLight = glm::length(lightDir);
+        lightDir = glm::normalize(lightDir);
 
-      Ray shadowRay = Ray(inters.point, lightDir);
-      Intersection shadowIntersection = getClosestIntersection(shadowRay, true);
+        Ray shadowRay = Ray(inters.point, lightDir);
+        Intersection shadowIntersection = getClosestIntersection(shadowRay, true);
 
-      if((!shadowIntersection.didHit() || distanceToLight < shadowIntersection.distanceTraveled )) {// We hit something behind the light
-        float totalDistanceTraveled = distanceToLight + inters.distanceTraveled + distanceTraveled; // Distance from light to intersection + inters to eye + recursion(reflected/refracted)
+        if((!shadowIntersection.didHit() || distanceToLight < shadowIntersection.distanceTraveled )) {// We hit something behind the light
+          float totalDistanceTraveled = distanceToLight + inters.distanceTraveled + distanceTraveled; // Distance from light to intersection + inters to eye + recursion(reflected/refracted)
 
-        float difIntensity = glm::dot(lightDir, inters.normal)*lightIter->power;
+          float difIntensity = glm::dot(lightDir, inters.normal)*lightIter->power;
 
-        glm::vec3 halfAngle = glm::normalize(lightDir - inters.incident.direction); // incident is in the direction from eye, so negate
-        float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
-        float specIntensity = powf(NdotH, inters.object->material.specHardness)*lightIter->power; // Spectral hardness of the material
+          glm::vec3 halfAngle = glm::normalize(lightDir - inters.incident.direction); // incident is in the direction from eye, so negate
+          float NdotH = std::max(0.0f, glm::dot(inters.normal, halfAngle));
+          float specIntensity = powf(NdotH, inters.object->material.specHardness)*lightIter->power; // Spectral hardness of the material
 
-        color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(totalDistanceTraveled, 2);
-        color += (lightIter->color * inters.object->material.dColor)*difIntensity/powf(totalDistanceTraveled, 2);
+          color += (lightIter->color * inters.object->material.sColor)*specIntensity/powf(totalDistanceTraveled, 2);
+          color += (lightIter->color * inters.object->material.dColor)*difIntensity/powf(totalDistanceTraveled, 2);
+        }
       }
     }
+
   }
   return color;
 }

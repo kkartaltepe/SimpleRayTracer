@@ -25,33 +25,34 @@ public:
     float distToCenterSquared = glm::dot(centerToOrigin, centerToOrigin);
     float distAlongProjSquared = projectionLength*projectionLength;
     float discriminant = distAlongProjSquared - distToCenterSquared + radius*radius;
-    if(discriminant < 0)
+    if(discriminant < 0.0f)
       return Intersection();
     else {
       //Find the closest intersection point by ray*d = quadratic formula
       float distanceAlongRayPlus = (-1.0f*projectionLength) + sqrtf(discriminant);
       float distanceAlongRayMinus = (-1.0f*projectionLength) - sqrtf(discriminant);
-      float t;
-      bool inside = false;
+      bool inside = distToCenterSquared <= radius*radius-0.00001f;
+      float t = 0.0f;
 
-      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus < 0) // The ray starts past the circle.
+      if(inside){ // The ray starts inside the circle
+        t = fmaxf(distanceAlongRayPlus, distanceAlongRayMinus); // One of these will be negative
+      } else {
+        if(distanceAlongRayPlus < 0.00005f) // ray hit too close to consider
+          t = distanceAlongRayMinus;
+        else if(distanceAlongRayMinus < 0.00005f)
+          t = distanceAlongRayPlus;
+        else
+          t = fminf(distanceAlongRayPlus, distanceAlongRayMinus);
+      }
+
+      if(t < 0.00005f) // The hit was behind the origin of the ray.
         return Intersection();
-      if(distanceAlongRayPlus < 0 && distanceAlongRayMinus > 0){ // The ray starts inside the circle!
-        t = distanceAlongRayMinus;
-        inside = true;
-      }
-      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus < 0){ // The ray starts inside the circle!
-        t = distanceAlongRayPlus;
-        inside = true;
-      }
-      if(distanceAlongRayPlus > 0 && distanceAlongRayMinus > 0) // The ray starts outside the circle and intersects the circle.
-        t = fminf(distanceAlongRayPlus, distanceAlongRayMinus);
 
       glm::vec3 intersectionPoint = ray.direction*t+ray.origin;
       // printf("IntersectionPoint (%f, %f, %f)\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
       glm::vec3 normal = glm::normalize(intersectionPoint-center);
       // Regularize the intersection point ala http://www.cse.yorku.ca/~amana/research/regularization.pdf and shift it just outside the circle.
-      return Intersection(center+normal*(radius+0.000001f), ray, fabs(t), normal, inside);
+      return Intersection(intersectionPoint, ray, fabs(t), normal, inside);
     }
   }
 };
