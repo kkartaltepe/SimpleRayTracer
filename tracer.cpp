@@ -18,7 +18,7 @@ void initSceneData() {
   scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
                          glm::vec3(0.0f, 1.5f, -1.5f),
                          glm::vec3(0.0f, 1.0f, 0.0f),
-                         60.0f, PROJ_WIDTH, PROJ_HEIGHT));
+                         60.0f, PROJ_WIDTH*4, PROJ_HEIGHT*4));
   scene.addLight(Light(glm::vec3(0.0f, 2.99f, -0.75f),
                        glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
 }
@@ -27,15 +27,28 @@ void* beginTracing(void* args) {
   sleep(2);
   std::vector<Ray> rays = scene.sceneCamera.raysToCast();
 
-  int index = 0;
-  for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
-    glm::vec3 color = trace(*rayIter, 0.0f, MAX_DEPTH);
+  for(int index = 0; index < PROJ_WIDTH*PROJ_HEIGHT; index++) {
+    glm::vec3 color = glm::vec3(0.0f);
+    for(int y = 0; y < 4; y++) {
+      for(int x = 0; x < 4; x++) {
+        color += trace(rays.at((index*4+index/PROJ_WIDTH*12*PROJ_WIDTH)+x+y*PROJ_WIDTH*4), 0.0f, MAX_DEPTH);
+      }
+    }
+    color = color/16.0f;
     pixels[index].red = int(fminf(color.x, 1.0f)*255);
     pixels[index].green = int(fminf(color.y, 1.0f)*255);
     pixels[index].blue = int(fminf(color.z, 1.0f)*255);
-    index++;
     glutPostRedisplay();
   }
+  // int index = 0;
+  // for(std::vector<Ray>::iterator rayIter = rays.begin(); rayIter != rays.end(); rayIter++) {
+  //   glm::vec3 color = trace(*rayIter, 0.0f, MAX_DEPTH);
+  //   pixels[index].red = int(fminf(color.x, 1.0f)*255);
+  //   pixels[index].green = int(fminf(color.y, 1.0f)*255);
+  //   pixels[index].blue = int(fminf(color.z, 1.0f)*255);
+  //   index++;
+  //   glutPostRedisplay();
+  // }
   return (void*)-1;
 }
 

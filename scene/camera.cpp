@@ -23,14 +23,16 @@ public:
 
   std::vector<Ray> raysToCast() {
     rays.clear();
-    float pixelWidth = 2.0f*tanf(fieldOfView/2.0f)/raysWide; // using a plane 1 unit from the camera.
-    float pixelHeight = pixelWidth*raysHigh/raysWide; // square out our pixels
+    float planeWidth = 2.0f*tanf(fieldOfView/2.0f); // using a plane 1 unit from the camera.
+    float pixelWidth = planeWidth/raysWide;
+    float planeHeight = planeWidth/(raysWide/raysHigh); // square out our pixels
+    float pixelHeight = planeHeight/raysHigh;
     glm::vec3 direction = glm::normalize(target - location);
     glm::vec3 codirection = glm::normalize(glm::cross(direction, up)); //Right
     glm::vec3 orthoUp = glm::normalize(glm::cross(codirection, direction));
-    glm::vec3 topLeftDirection = direction - raysWide/2.0f*pixelWidth*codirection + raysHigh/2.0f*pixelHeight*orthoUp;
+    glm::vec3 topLeftDirection = direction - planeWidth/2.0f*codirection + planeHeight/2.0f*orthoUp; // Camera shoots into the center of the viewing plane
     for(int y = 0; y < raysHigh; y++) {
-      for(int x = 0; x < raysWide; x++) {
+      for(int x = 0; x < raysWide; x++) { // Trace rays by row then column
         glm::vec3 rayDirection = topLeftDirection + x*pixelWidth*codirection - y*pixelHeight*orthoUp;
         rays.push_back(Ray(location, rayDirection));
       }
