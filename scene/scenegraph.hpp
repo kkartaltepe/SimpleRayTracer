@@ -22,6 +22,7 @@ public:
                             glm::vec3(0.0f, 1.0f, 0.0f),
                             90.0f, PROJ_WIDTH, PROJ_HEIGHT) { };
   void addObject(Object object){
+    object.generateBvh();
     objects.push_back(object);
   }
   void addLight(Light light) {

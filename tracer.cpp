@@ -14,13 +14,13 @@ SceneGraph scene;
 glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth);
 
 void initSceneData() {
-  scene = loadScene("data/room.obj");
-  scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
-                         glm::vec3(0.0f, 1.5f, -1.5f),
-                         glm::vec3(0.0f, 1.0f, 0.0f),
-                         60.0f, PROJ_WIDTH, PROJ_HEIGHT));
-  scene.addLight(Light(glm::vec3(0.0f, 2.99f, -0.75f),
-                       glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
+  scene = loadScene("data/monkey.scene");
+  // scene.setCamera(Camera(glm::vec3(0.0f, 2.0f, -4.0f),
+  //                        glm::vec3(0.0f, 1.5f, -1.5f),
+  //                        glm::vec3(0.0f, 1.0f, 0.0f),
+  //                        60.0f, PROJ_WIDTH, PROJ_HEIGHT));
+  // scene.addLight(Light(glm::vec3(0.0f, 2.99f, -0.75f),
+  //                      glm::vec3(1.0f, 1.0f, 1.0f), 20.0f));
 }
 
 void* beginTracing(void* args) {
@@ -64,15 +64,10 @@ int main(int argc, char** argv) {
 Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
   Intersection closestInters = Intersection();
   for(std::vector<Object>::iterator obj = scene.objects.begin(); obj != scene.objects.end(); ++obj) {
-    for(std::vector<Triangle>::iterator tri = obj->triangles.begin(); tri != obj->triangles.end(); ++tri) {
-      Intersection inters = tri->intersect(ray);
-      if( inters.didHit() ) {
-        if( inters.distanceTraveled < closestInters.distanceTraveled || !closestInters.didHit() ) {
-
-          closestInters = inters;
-          closestInters.object = &*obj;
-        }
-      }
+    Intersection inters = obj->bvh.intersect(ray, 0.0f, 100.0f);
+    if( inters.distanceTraveled < closestInters.distanceTraveled || !closestInters.didHit() ) {
+      closestInters = inters;
+      closestInters.object = &*obj;
     }
     for(std::vector<Circle>::iterator circ = obj->circles.begin(); circ != obj->circles.end(); ++circ) {
       Intersection inters = circ->intersect(ray);
@@ -95,9 +90,6 @@ Intersection getClosestIntersection(Ray ray, bool isShadowRay) {
  * @return
  */
 glm::vec3 trace(Ray ray, float distanceTraveled, int maxDepth) {
-  // if(maxDepth == 0) {
-  //   printf("Reached 4 recursions\n");
-  // }
   glm::vec3 color = glm::vec3(0.0f);
   Intersection inters = getClosestIntersection(ray, false);
   if(inters.didHit()) { //if we hit something figure out the color.

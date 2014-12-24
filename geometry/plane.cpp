@@ -10,9 +10,10 @@
 
 class Plane {
 public:
-  glm::vec3 p1,p2,p3,normal;
+  glm::vec3 p1,p2,p3,normal,center;
   Plane(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): p1(p1), p2(p2), p3(p3) {
     normal = glm::normalize(glm::cross(p2-p1, p3-p2));
+    center = (p1+p2+p3)/3.0f;
   }
   /**
    * calculate the intersection point of a ray with this plane, the plane is

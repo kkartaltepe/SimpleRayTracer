@@ -8,6 +8,7 @@
 #include "intersection.hpp"
 #include "ray.hpp"
 #include "plane.cpp"
+#include "bound.cpp"
 
 class Triangle {
 private:
@@ -16,6 +17,7 @@ private:
   float d11, d12, d22;
 public:
   Plane plane;
+  Bound bound;
 
   Triangle(Plane p): plane(p) {
     edge1 = plane.p2 - plane.p1;
@@ -23,6 +25,7 @@ public:
     d11 = glm::dot(edge1, edge1);
     d12 = glm::dot(edge1, edge2);
     d22 = glm::dot(edge2, edge2);
+    bound = Triangle::boundOf(this);
   }
   Triangle(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3): plane(p1, p2, p3) {
     edge1 = plane.p2 - plane.p1;
@@ -30,6 +33,7 @@ public:
     d11 = glm::dot(edge1, edge1);
     d12 = glm::dot(edge1, edge2);
     d22 = glm::dot(edge2, edge2);
+    bound = Triangle::boundOf(this);
   }
   /**
    * calculate the intersection point of a ray with this plane
@@ -69,6 +73,42 @@ public:
     baryCoords.y = vNumer/denom;
     baryCoords.z = 1-baryCoords.x-baryCoords.y;
     return baryCoords;
+  }
+
+  static Bound boundOf(Triangle* const triangle) {
+    Bound bound = Bound();
+    bound.max = triangle->plane.p1;
+    bound.min = triangle->plane.p1;
+
+    if(triangle->plane.p2.x > bound.max.x) // grow maxes
+      bound.max.x = triangle->plane.p2.x;
+    if(triangle->plane.p2.y > bound.max.y)
+      bound.max.y = triangle->plane.p2.y;
+    if(triangle->plane.p2.z > bound.max.z)
+      bound.max.z = triangle->plane.p2.z;
+
+    if(triangle->plane.p3.x > bound.max.x)
+      bound.max.x = triangle->plane.p3.x;
+    if(triangle->plane.p3.y > bound.max.y)
+      bound.max.y = triangle->plane.p3.y;
+    if(triangle->plane.p3.z > bound.max.z)
+      bound.max.z = triangle->plane.p3.z;
+
+    if(triangle->plane.p2.x < bound.min.x) // grow mins
+      bound.min.x = triangle->plane.p2.x;
+    if(triangle->plane.p2.y < bound.min.y)
+      bound.min.y = triangle->plane.p2.y;
+    if(triangle->plane.p2.z < bound.min.z)
+      bound.min.z = triangle->plane.p2.z;
+
+    if(triangle->plane.p3.x < bound.min.x)
+      bound.min.x = triangle->plane.p3.x;
+    if(triangle->plane.p3.y < bound.min.y)
+      bound.min.y = triangle->plane.p3.y;
+    if(triangle->plane.p3.z < bound.min.z)
+      bound.min.z = triangle->plane.p3.z;
+
+    return bound;
   }
 };
 

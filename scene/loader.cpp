@@ -68,6 +68,7 @@ void loadMaterials(std::string mtlFileName, SceneGraph *currentScene) {
  */
 SceneGraph loadScene(std::string sceneDataPath) {
   std::vector<glm::vec3> vertices;
+
   Object* curObject = NULL;
   SceneGraph scene;
   std::ifstream sceneDataStream(sceneDataPath.c_str(), std::ios::in);
@@ -126,7 +127,7 @@ SceneGraph loadScene(std::string sceneDataPath) {
   } else { printf("Failed to load mesh data from '%s'\n", sceneDataPath.c_str()); }
   if(curObject)
     scene.addObject(*curObject);
-    delete curObject;
+  delete curObject;
   return scene;
 }
 

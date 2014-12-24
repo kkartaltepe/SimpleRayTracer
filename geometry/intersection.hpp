@@ -18,7 +18,7 @@ public:
   Intersection(glm::vec3 p, Ray i, float distance, glm::vec3 n, bool inside)
     : point(p), incident(i), distanceTraveled(distance), normal(n), inside(inside) { hit=true; }
   Intersection() { hit=false; }
-  bool didHit() { return hit;}
+  bool didHit() { return hit; }
 };
 
 #endif /* end of include guard: INTERSECTION_HPP */
