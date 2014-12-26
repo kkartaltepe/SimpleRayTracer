@@ -73,8 +73,10 @@ public:
 		tmin = fmax(tmin, fmin(tzmin, tzmax));
 		tmax = fmin(tmax, fmax(tzmin, tzmax));
 
+		// printf("tmax: %f, tmin: %f\n", tmax, tmin);
+
 		// tmin and tmax are the interval, hopefully infront of the ray;	
-		return tmin < maxt && tmax > mint && tmax > tmin;
+		return tmin < maxt && tmax > mint && tmax >= tmin;
 	}
 
 	/**

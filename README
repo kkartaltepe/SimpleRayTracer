@@ -9,3 +9,4 @@ Current Features:
  - Shadows
  - Diffuse Lighting
  - FoV Camera
+ - Bounding Volume Heirarchy acceleration (utilizing Axis Aligned Bounding Boxes and Z-Ordering of primitives)

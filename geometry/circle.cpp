@@ -37,9 +37,9 @@ public:
       if(inside){ // The ray starts inside the circle
         t = fmaxf(distanceAlongRayPlus, distanceAlongRayMinus); // One of these will be negative
       } else {
-        if(distanceAlongRayPlus < 0.00005f) // ray hit too close to consider
+        if(distanceAlongRayPlus < 0.00006f) // ray hit too close to consider
           t = distanceAlongRayMinus;
-        else if(distanceAlongRayMinus < 0.00005f)
+        else if(distanceAlongRayMinus < 0.00006f)
           t = distanceAlongRayPlus;
         else
           t = fminf(distanceAlongRayPlus, distanceAlongRayMinus);

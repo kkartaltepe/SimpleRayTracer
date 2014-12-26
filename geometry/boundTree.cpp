@@ -57,16 +57,21 @@ public:
 	std::vector<BoundTree> children;
 
 	// Empty unless this is a leaf
-	Triangle *triangleLeaf;
-	Circle *circleLeaf;
+
+	std::vector<Triangle*> triangleLeaves;
+	std::vector<Circle*> circleLeaf;
 
 
 	BoundTree() { }
 
-	BoundTree(std::vector<Triangle*> triangles) {
-		triangleLeaf = NULL;
+	BoundTree(std::vector<Circle*> circles, std::vector<Triangle*> triangles, int trianglesPerLeaf) {
+		// triangleLeaf = NULL;
 		for(std::vector<Triangle*>::iterator iter = triangles.begin(); iter != triangles.end(); iter++) { // expand bounds
 			bound = Bound::combine(bound, (*iter)->bound);
+		}
+		if (triangles.size() <= trianglesPerLeaf) {
+			triangleLeaves = triangles;
+			return;
 		}
 
 		// struct AxisAlignedCenterComparitor comparitor;
@@ -77,33 +82,31 @@ public:
 		//partition into left and fill out left
 		std::vector<Triangle*> left;
 		int childSize = triangles.size()/2;
-		if(childSize >= 2) { 
-			while(triangles.size() > childSize) {
-				left.push_back(triangles.back());
-				triangles.pop_back();
-			}
-			children.push_back(BoundTree(left));
-			children.push_back(BoundTree(triangles)); //Right children are all left in triangles
-		} else {
-			children.push_back(BoundTree(triangles.back()));
+		while(triangles.size() > childSize) {
+			left.push_back(triangles.back());
 			triangles.pop_back();
-			if(triangles.size() == 2)
-				children.push_back(BoundTree(triangles));
-			else
-				children.push_back(BoundTree(triangles.back()));
 		}
-
+		children.push_back(BoundTree(circles, left, trianglesPerLeaf));
+		children.push_back(BoundTree(circles, triangles, trianglesPerLeaf)); //Right children are all left in triangles
 	}
 
-	BoundTree(Triangle* triangle) {
-		bound = triangle->bound;
-		triangleLeaf = triangle;
-	}
+	// BoundTree(Triangle* triangle) {
+	// 	bound = triangle->bound;
+	// 	triangleLeaf = triangle;
+	// }
 
 	Intersection intersect(Ray ray, float mint, float maxt) {
 		if(bound.intersect(ray, mint, maxt)) {
 			if(children.size() == 0) {
-				return triangleLeaf->intersect(ray);
+				Intersection closest;
+				for(std::vector<Triangle*>::iterator iter = triangleLeaves.begin(); iter != triangleLeaves.end(); iter++) {
+					Intersection childInters = (*iter)->intersect(ray);
+					if(childInters.didHit()) {
+						if(childInters.distanceTraveled < closest.distanceTraveled || !closest.didHit())
+							closest = childInters;
+					}
+				}
+				return closest;
 			} else {
 				Intersection closest;
 				for(std::vector<BoundTree>::iterator iter = children.begin(); iter != children.end(); iter++) {

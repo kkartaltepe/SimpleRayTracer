@@ -26,7 +26,11 @@ public:
   	for(std::vector<Triangle>::iterator iter = triangles.begin(); iter != triangles.end(); iter++)
   		trianglePtrs.push_back(&*iter);
 
-  	bvh = BoundTree(trianglePtrs);
+    std::vector<Circle*> circlePtrs;
+    for(std::vector<Circle>::iterator iter = circles.begin(); iter != circles.end(); iter++)
+      circlePtrs.push_back(&*iter);
+
+  	bvh = BoundTree(circlePtrs, trianglePtrs, 4);
   }
 };
 
